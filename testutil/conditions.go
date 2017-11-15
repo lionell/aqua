@@ -1,9 +1,9 @@
 package testutil
 
 import (
+	"fmt"
 	"github.com/lionell/aqua/column"
 	"github.com/lionell/aqua/data"
-	"fmt"
 )
 
 type conditionWithLimit int
@@ -26,7 +26,7 @@ type oddCondition string
 func (c oddCondition) Check(m map[string]data.Value) (bool, error) {
 	if v, ok := m[string(c)]; ok {
 		if i, ok := v.(data.I32); ok {
-			return i % 2 == 1, nil
+			return i%2 == 1, nil
 		} else {
 			return false, fmt.Errorf("can't check if odd, expected value of type I32 got %#v", v)
 		}

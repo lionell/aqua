@@ -73,7 +73,9 @@ func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
 	ds1 := StartInfiniteProducer(rows)
 	ds2 := StartProducer(nil)
 	ds := Union(ds1, ds2)
-	RunConsumerWithLimit(ds, 20)
+	res := RunConsumerWithLimit(ds, 2)
+
+	AssertEquals(t, res, rows)
 }
 
 func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
@@ -85,5 +87,7 @@ func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
 	ds1 := StartProducer(nil)
 	ds2 := StartInfiniteProducer(rows)
 	ds := Union(ds1, ds2)
-	RunConsumerWithLimit(ds, 20)
+	res := RunConsumerWithLimit(ds, 2)
+
+	AssertEquals(t, res, rows)
 }

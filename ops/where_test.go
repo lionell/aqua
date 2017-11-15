@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// TODO(lionell): Test for errors
+
 func TestWhereTakeFirstRows(t *testing.T) {
 	rows := []Row{
 		{I32(1)},

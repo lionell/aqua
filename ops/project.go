@@ -37,6 +37,8 @@ func Project(in data.Source, h data.Header, es []column.Expression) data.Source 
 				goOn = false
 			}
 		}
+		in.Finalize()
+		out.Signal()
 	}()
 
 	return out

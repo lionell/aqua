@@ -2,9 +2,9 @@ package testutil
 
 import (
 	"github.com/lionell/aqua/data"
-	"testing"
-	"log"
 	"io/ioutil"
+	"log"
+	"testing"
 )
 
 func init() {

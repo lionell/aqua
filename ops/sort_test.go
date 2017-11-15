@@ -114,5 +114,7 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Sort(ds, []column.Order{{0, column.ASC}})
-	RunConsumerWithLimit(ds, 2)
+	res := RunConsumerWithLimit(ds, 1)
+
+	AssertEquals(t, res, rows[2:3])
 }

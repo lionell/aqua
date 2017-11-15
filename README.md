@@ -15,8 +15,12 @@ Rewrite aqua-lang in Go
 - [ ] UML
 
 ## Roadmap
-- [ ] Project
-- [ ] Where (tests)
+- [x] Project
+- [x] Where (tests)
+- [x] Project (tests)
+- [ ] Join
+- [ ] Join (tests)
 - [ ] Refactor jobs package to cons/prod
 - [ ] Error handling
 - [ ] CLI
+- [ ] Add more datatypes(float64, string, char)
