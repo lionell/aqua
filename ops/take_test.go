@@ -15,7 +15,7 @@ func TestTakeStopsWhenSourceIsEmpty(t *testing.T) {
 }
 
 func TestTakeWhenRowsLessThanLimit(t *testing.T) {
-	var rows = []Row{
+	rows := []Row{
 		{I32(1), I32(2)},
 	}
 
@@ -27,7 +27,7 @@ func TestTakeWhenRowsLessThanLimit(t *testing.T) {
 }
 
 func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
-	var rows = []Row{
+	rows := []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	}
@@ -40,7 +40,7 @@ func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
 }
 
 func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
-	var rows = []Row{
+	rows := []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	}
@@ -53,7 +53,7 @@ func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
 }
 
 func TestTakeCanStop(t *testing.T) {
-	var rows = []Row{
+	rows := []Row{
 		{I32(1), I32(2)},
 		{I32(4), I32(8)},
 	}

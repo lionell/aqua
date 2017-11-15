@@ -3,7 +3,13 @@ package testutils
 import (
 	"github.com/lionell/aqua/data"
 	"testing"
+	"log"
+	"io/ioutil"
 )
+
+func init() {
+	log.SetOutput(ioutil.Discard)
+}
 
 func AssertEquals(t *testing.T, a, b []data.Row) {
 	if len(a) != len(b) {
