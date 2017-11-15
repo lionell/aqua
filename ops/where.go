@@ -10,40 +10,34 @@ import (
 
 var WhereCnt uint64 = 0
 
-func Where(in data.Source, c column.Condition, h data.Header) (data.Source, <-chan error) {
+func Where(in data.Source, h data.Header, c column.Condition) data.Source {
 	out := data.NewSource()
-	errs := make(chan error)
 	id := fmt.Sprintf("[Where %v]: ", atomic.AddUint64(&WhereCnt, 1))
 
 	go func() {
-	Loop:
-		for {
+		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
-				m, err := bind(r, h)
+				m, err := data.Bind(r, h)
 				if err != nil {
-					errs <- err
+					// TODO(lionell): Handle error
 					break
 				}
 				ok, err := c.Check(m)
 				if err != nil {
-					errs <- err
+					// TODO(lionell): Handle error
 					break
 				}
 				if !ok {
-					break
+					continue
 				}
-				select {
-				case out.Data <- r:
-				case <-out.Stop:
-					break Loop
-				}
+				goOn = out.TrySend(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.SetFinalized()
-				break Loop
+				goOn = false
 			case <-out.Stop:
-				break Loop
+				goOn = false
 			}
 		}
 		in.Finalize()
@@ -51,16 +45,5 @@ func Where(in data.Source, c column.Condition, h data.Header) (data.Source, <-ch
 		out.Signal()
 	}()
 
-	return out, errs
-}
-
-func bind(r data.Row, h data.Header) (map[string]data.Value, error) {
-	if len(r) != len(h) {
-		return nil, fmt.Errorf("row length (%v) is not equal to header length (%v)", len(r), len(h))
-	}
-	res := make(map[string]data.Value)
-	for i, v := range r {
-		res[h[i]] = v
-	}
-	return res, nil
+	return out
 }

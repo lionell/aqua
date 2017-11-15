@@ -15,27 +15,21 @@ func Distinct(in data.Source) data.Source {
 
 	go func() {
 		s := data.NewRowSet()
-	Loop:
-		for {
+		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
 				if s.Has(r) {
 					log.Printf(id+"Skipping %v", r)
 					continue
 				}
-				select {
-				case out.Data <- r:
-					s.Put(r)
-				case <-out.Stop:
-					break Loop
-				}
+				s.Put(r)
+				goOn = out.TrySend(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.SetFinalized()
-				break Loop
-
+				goOn = false
 			case <-out.Stop:
-				break Loop
+				goOn = false
 			}
 		}
 		in.Finalize()

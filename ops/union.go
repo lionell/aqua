@@ -14,36 +14,27 @@ func Union(in1, in2 data.Source) data.Source {
 	id := fmt.Sprintf("[Union %v]: ", atomic.AddUint64(&UnionCnt, 1))
 
 	go func() {
-	Loop:
-		for {
+		for goOn := true; goOn; {
 			select {
 			case r := <-in1.Data:
-				select {
-				case out.Data <- r:
-				case <-out.Stop:
-					break Loop
-				}
+				goOn = out.TrySend(r)
 			case <-in1.Done:
 				log.Println(id + "First source is empty.")
 				in1.SetFinalized()
-				for {
+				for goOn {
 					select {
 					case r := <-in2.Data:
-						select {
-						case out.Data <- r:
-						case <-out.Stop:
-							break Loop
-						}
+						goOn = out.TrySend(r)
 					case <-in2.Done:
 						log.Println(id + "Second source is empty.")
 						in2.SetFinalized()
-						break Loop
+						goOn = false
 					case <-out.Stop:
-						break Loop
+						goOn = false
 					}
 				}
 			case <-out.Stop:
-				break Loop
+				goOn = false
 			}
 		}
 		log.Println(id + "Finished.")

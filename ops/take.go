@@ -14,31 +14,30 @@ func Take(in data.Source, cnt int) data.Source {
 	id := fmt.Sprintf("[Take %v]: ", atomic.AddUint64(&TakeCnt, 1))
 
 	go func() {
-	Loop:
-		for {
+		for goOn := true; goOn; {
 			if cnt == 0 {
-				break Loop
+				break
 			}
 			select {
 			case r := <-in.Data:
-				select {
-				case out.Data <- r:
-				case <-out.Stop:
-					break Loop
-				}
 				cnt--
+				goOn = out.TrySend(r)
+				//select {
+				//case out.Data <- r:
+				//case <-out.Stop:
+				//	break Loop
+				//}
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.SetFinalized()
-				break Loop
+				goOn = false
 			case <-out.Stop:
-				log.Println(id + "Stop.")
-				break Loop
+				goOn = false
 			}
 		}
 		in.Finalize()
 		log.Println(id + "Finished.")
-		out.Done <- struct{}{}
+		out.Signal()
 	}()
 
 	return out
