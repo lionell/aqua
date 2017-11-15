@@ -3,7 +3,7 @@ package ops
 import (
 	"github.com/lionell/aqua/column"
 	. "github.com/lionell/aqua/data"
-	. "github.com/lionell/aqua/testutils"
+	. "github.com/lionell/aqua/testutil"
 	"testing"
 	"time"
 )
