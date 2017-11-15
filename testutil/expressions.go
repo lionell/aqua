@@ -1,9 +1,9 @@
 package testutil
 
 import (
-	"github.com/lionell/aqua/data"
-	"github.com/lionell/aqua/column"
 	"fmt"
+	"github.com/lionell/aqua/column"
+	"github.com/lionell/aqua/data"
 )
 
 type sumExpression []string

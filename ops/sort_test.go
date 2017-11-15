@@ -1,7 +1,7 @@
 package ops
 
 import (
-	"github.com/lionell/aqua/column"
+	. "github.com/lionell/aqua/column"
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
@@ -44,7 +44,7 @@ func TestSortByOneColumn(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []column.Order{{0, column.ASC}})
+	ds = Sort(ds, []Order{{0, ASC}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -67,7 +67,7 @@ func TestSortByTwoColumns(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []column.Order{{0, column.DESC}, {1, column.ASC}})
+	ds = Sort(ds, []Order{{0, DESC}, {1, ASC}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -88,7 +88,7 @@ func TestSortWithEqualRows(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []column.Order{{0, column.ASC}})
+	ds = Sort(ds, []Order{{0, ASC}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -100,7 +100,7 @@ func TestSortCanStopOnReceivingData(t *testing.T) {
 	}
 
 	ds := StartInfiniteProducer(rows)
-	ds = Sort(ds, []column.Order{{0, column.ASC}})
+	ds = Sort(ds, []Order{{0, ASC}})
 	RunConsumerWithTimeout(ds, time.Millisecond*100)
 }
 
@@ -113,7 +113,7 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []column.Order{{0, column.ASC}})
+	ds = Sort(ds, []Order{{0, ASC}})
 	res := RunConsumerWithLimit(ds, 1)
 
 	AssertEquals(t, res, rows[2:3])

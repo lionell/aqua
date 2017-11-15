@@ -1,10 +1,10 @@
 package ops
 
 import (
+	. "github.com/lionell/aqua/column"
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
-	"github.com/lionell/aqua/column"
 )
 
 // TODO(lionell): Test for errors
@@ -16,7 +16,7 @@ func TestProjectColumnOnItself(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test"}, []column.Expression{NewSumExpression("test")})
+	ds = Project(ds, []string{"test"}, []Expression{NewSumExpression("test")})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, rows)
@@ -33,7 +33,7 @@ func TestProjectSumOfColumns(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test1", "test2"}, []column.Expression{NewSumExpression("test1", "test2")})
+	ds = Project(ds, []string{"test1", "test2"}, []Expression{NewSumExpression("test1", "test2")})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -50,7 +50,7 @@ func TestProjectDoesNotIncludeUnnecessaryColumns(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test1", "test2"}, []column.Expression{NewSumExpression("test1")})
+	ds = Project(ds, []string{"test1", "test2"}, []Expression{NewSumExpression("test1")})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -66,7 +66,7 @@ func TestProjectCanStop(t *testing.T) {
 	}
 
 	ds := StartInfiniteProducer(rows)
-	ds = Project(ds, []string{"test"}, []column.Expression{NewSumExpression("test")})
+	ds = Project(ds, []string{"test"}, []Expression{NewSumExpression("test")})
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEquals(t, res, exp)
