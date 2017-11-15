@@ -20,7 +20,7 @@ func (r Row) str() string {
 	return fmt.Sprintf("%#v", r)
 }
 
-func NewRow(vals ...Value) Row {
+func RowOf(vals ...Value) Row {
 	return Row(vals)
 }
 

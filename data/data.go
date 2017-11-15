@@ -17,3 +17,14 @@ func (h Header) Find(s string) (int, error) {
 	}
 	return -1, fmt.Errorf("element (%v) not found in the header %v", s, h)
 }
+
+func Bind(r Row, h Header) (map[string]Value, error) {
+	if len(r) != len(h) {
+		return nil, fmt.Errorf("row length (%v) is not equal to header length (%v)", len(r), len(h))
+	}
+	res := make(map[string]Value)
+	for i, v := range r {
+		res[h[i]] = v
+	}
+	return res, nil
+}

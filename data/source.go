@@ -32,3 +32,12 @@ func (s *Source) SetFinalized() {
 func (s Source) Signal() {
 	s.Done <- struct{}{}
 }
+
+func (s Source) TrySend(r Row) bool {
+	select {
+	case s.Data <- r:
+		return true
+	case <-s.Stop:
+		return false
+	}
+}

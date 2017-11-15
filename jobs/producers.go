@@ -18,8 +18,8 @@ func NewRandomProducer(d time.Duration) data.Source {
 	go func() {
 	Loop:
 		for {
-			r := data.NewRow(data.I32(rand.Intn(30)), data.I32(rand.Intn(30)), data.I32(rand.Intn(30)))
-			//r := data.NewRow(data.I32(rand.Intn(30)))
+			r := data.RowOf(data.I32(rand.Intn(30)), data.I32(rand.Intn(30)), data.I32(rand.Intn(30)))
+			//r := data.RowOf(data.I32(rand.Intn(30)))
 			select {
 			case out.Data <- r:
 				log.Printf(id+"Send %v\n", r)
