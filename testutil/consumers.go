@@ -5,20 +5,17 @@ import (
 	"time"
 )
 
-func RunConsumer(in data.Source) []data.Row {
+func RunConsumer(in data.Source) (data.Header, []data.Row) {
 	var out []data.Row
-
-Loop:
-	for {
+	for goOn := true; goOn; {
 		select {
 		case r := <-in.Data:
 			out = append(out, r)
 		case <-in.Done:
-			break Loop
+			goOn = false
 		}
 	}
-
-	return out
+	return in.Header, out
 }
 
 func RunConsumerWithLimit(in data.Source, limit int) []data.Row {
