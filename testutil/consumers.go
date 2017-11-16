@@ -5,57 +5,51 @@ import (
 	"time"
 )
 
-func RunConsumer(in data.Source) (data.Header, []data.Row) {
-	var out []data.Row
+func RunConsumer(in data.Source) data.Table {
+	var rows []data.Row
 	for goOn := true; goOn; {
 		select {
 		case r := <-in.Data:
-			out = append(out, r)
+			rows = append(rows, r)
 		case <-in.Done:
 			goOn = false
 		}
 	}
-	return in.Header, out
+	return data.NewTable(in.Header, rows)
 }
 
-func RunConsumerWithLimit(in data.Source, limit int) []data.Row {
-	var out []data.Row
-
-Loop:
-	for {
+func RunConsumerWithLimit(in data.Source, limit int) data.Table {
+	var rows []data.Row
+	for goOn := true; goOn; {
 		select {
 		case r := <-in.Data:
-			out = append(out, r)
+			rows = append(rows, r)
 			limit--
 			if limit == 0 {
-				break Loop
+				goOn = false
 			}
 		case <-in.Done:
 			in.IsFinalized()
-			break Loop
+			goOn = false
 		}
 	}
-
 	in.Finalize()
-	return out
+	return data.NewTable(in.Header, rows)
 }
 
-func RunConsumerWithTimeout(in data.Source, timeout time.Duration) []data.Row {
-	var out []data.Row
-
-Loop:
-	for {
+func RunConsumerWithTimeout(in data.Source, timeout time.Duration) data.Table {
+	var rows []data.Row
+	for goOn := true; goOn; {
 		select {
 		case r := <-in.Data:
-			out = append(out, r)
+			rows = append(rows, r)
 		case <-in.Done:
 			in.IsFinalized()
-			break Loop
+			goOn = false
 		case <-time.After(timeout):
-			break Loop
+			goOn = false
 		}
 	}
-
 	in.Finalize()
-	return out
+	return data.NewTable(in.Header, rows)
 }

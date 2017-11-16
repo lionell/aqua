@@ -10,72 +10,72 @@ import (
 // TODO(lionell): Test for errors.
 
 func TestProjectColumnOnItself(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a"}, []Row{
 		{I32(1)},
 		{I32(2)},
-	}
+	})
 
-	ds := StartProducer(rows, "a")
+	ds := StartProducer(in)
 	ds = Project(ds, []Definition{{"a", NewSumExpression("a")}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, rows)
+	AssertEqualRows(t, res.Rows, in.Rows)
 }
 
 func TestProjectSumOfColumns(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(8)},
 		{I32(2), I32(-1)},
-	}
+	})
 	exp := []Row{
 		{I32(9)},
 		{I32(1)},
 	}
 
-	ds := StartProducer(rows, "a", "b")
+	ds := StartProducer(in)
 	ds = Project(ds, []Definition{{"c", NewSumExpression("a", "b")}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestProjectDoesNotIncludeUnnecessaryColumns(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(8)},
 		{I32(2), I32(-1)},
-	}
+	})
 	exp := []Row{
 		{I32(1)},
 		{I32(2)},
 	}
 
-	ds := StartProducer(rows, "a", "b")
+	ds := StartProducer(in)
 	ds = Project(ds, []Definition{{"c", NewSumExpression("a")}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestProjectCanStop(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a"}, []Row{
 		{I32(1)},
-	}
+	})
 	exp := []Row{
 		{I32(1)},
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(rows, "a")
+	ds := StartInfiniteProducer(in)
 	ds = Project(ds, []Definition{{"a", NewSumExpression("a")}})
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestProjectPreservesHeader(t *testing.T) {
-	ds := StartProducer(nil, "a", "b")
+	ds := StartProducer(NewTable([]string{"a", "b"}, nil))
 	ds = Project(ds, []Definition{{"c", NewSumExpression("a")}})
-	h, _ := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualHeaders(t, h, []string{"c"})
+	AssertEqualHeaders(t, res.Header, []string{"c"})
 }

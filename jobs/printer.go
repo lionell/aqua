@@ -11,33 +11,31 @@ import (
 func RunTabularWriter(out io.Writer, ds data.Source) {
 	w := tabwriter.NewWriter(out, 0, 0, 3, ' ', tabwriter.AlignRight)
 	defer w.Flush()
-
 	writeHeader(w, ds.Header)
-Loop:
-	for {
+	for goOn := true; goOn; {
 		select {
 		case r := <-ds.Data:
 			writeRow(w, r)
 		case <-ds.Done:
-			break Loop
+			goOn = false
 		}
 	}
 }
 
 func writeRow(w io.Writer, r data.Row) {
 	var buf bytes.Buffer
+	defer buf.WriteTo(w)
 	for _, v := range r {
 		buf.WriteString(fmt.Sprintf("%v\t", v))
 	}
 	buf.WriteString("\n")
-	buf.WriteTo(w)
 }
 
 func writeHeader(w io.Writer, h data.Header) {
 	var buf bytes.Buffer
+	defer buf.WriteTo(w)
 	for _, v := range h {
 		buf.WriteString(fmt.Sprintf("%v\t", v))
 	}
 	buf.WriteString("\n")
-	buf.WriteTo(w)
 }

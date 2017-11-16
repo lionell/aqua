@@ -9,96 +9,96 @@ import (
 // TODO(lionell): Test union throws error when headers don't match.
 
 func TestUnionWhenFirstSourceIsEmpty(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
-	}
+	})
 
-	ds1 := StartProducer(nil)
-	ds2 := StartProducer(rows)
+	ds1 := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds2 := StartProducer(in)
 	ds := Union(ds1, ds2)
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, rows)
+	AssertEqualRows(t, res.Rows, in.Rows)
 }
 
 func TestUnionWhenSecondSourceIsEmpty(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
-	}
+	})
 
-	ds1 := StartProducer(rows)
-	ds2 := StartProducer(nil)
+	ds1 := StartProducer(in)
+	ds2 := StartProducer(NewTable([]string{"a", "b"}, nil))
 	ds := Union(ds1, ds2)
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, rows)
+	AssertEqualRows(t, res.Rows, in.Rows)
 }
 
 func TestUnionWhenBothSourcesAreEmpty(t *testing.T) {
-	ds1 := StartProducer(nil)
-	ds2 := StartProducer(nil)
+	ds1 := StartProducer(NewTable([]string{"a"}, nil))
+	ds2 := StartProducer(NewTable([]string{"a"}, nil))
 	ds := Union(ds1, ds2)
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, nil)
+	AssertEqualRows(t, res.Rows, nil)
 }
 
 func TestUnionReturnsDataInCorrectOrder(t *testing.T) {
-	rows1 := []Row{
+	in1 := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
-	}
-	rows2 := []Row{
+	})
+	in2 := NewTable([]string{"a", "b"}, []Row{
 		{I32(5), I32(6)},
 		{I32(7), I32(8)},
-	}
+	})
 	var exp []Row
-	exp = append(exp, rows1...)
-	exp = append(exp, rows2...)
+	exp = append(exp, in1.Rows...)
+	exp = append(exp, in2.Rows...)
 
-	ds1 := StartProducer(rows1)
-	ds2 := StartProducer(rows2)
+	ds1 := StartProducer(in1)
+	ds2 := StartProducer(in2)
 	ds := Union(ds1, ds2)
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(5), I32(6)},
 		{I32(7), I32(8)},
-	}
+	})
 
-	ds1 := StartInfiniteProducer(rows)
-	ds2 := StartProducer(nil)
+	ds1 := StartInfiniteProducer(in)
+	ds2 := StartProducer(NewTable([]string{"a", "b"}, nil))
 	ds := Union(ds1, ds2)
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEqualRows(t, res, rows)
+	AssertEqualRows(t, res.Rows, in.Rows)
 }
 
 func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(5), I32(6)},
 		{I32(7), I32(8)},
-	}
+	})
 
-	ds1 := StartProducer(nil)
-	ds2 := StartInfiniteProducer(rows)
+	ds1 := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds2 := StartInfiniteProducer(in)
 	ds := Union(ds1, ds2)
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEqualRows(t, res, rows)
+	AssertEqualRows(t, res.Rows, in.Rows)
 }
 
 func TestUnionPreservesHeader(t *testing.T) {
-	ds1 := StartProducer(nil, "a", "b")
-	ds2 := StartProducer(nil, "a", "b")
+	ds1 := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds2 := StartProducer(NewTable([]string{"a", "b"}, nil))
 	ds := Union(ds1, ds2)
-	h, _ := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualHeaders(t, h, []string{"a", "b"})
+	AssertEqualHeaders(t, res.Header, []string{"a", "b"})
 }

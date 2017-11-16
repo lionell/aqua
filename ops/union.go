@@ -10,7 +10,9 @@ import (
 var UnionCnt uint64 = 0
 
 func Union(in1, in2 data.Source) data.Source {
-	// TODO(lionell): Verify that in1.Header == in2.Header
+	if err := verifyHeaders(in1.Header, in2.Header); err != nil {
+		// TODO(lionell): Handle error.
+	}
 	out := data.NewSource(in1.Header)
 	id := fmt.Sprintf("[Union %v]: ", atomic.AddUint64(&UnionCnt, 1))
 	go func() {
@@ -43,4 +45,16 @@ func Union(in1, in2 data.Source) data.Source {
 		out.Signal()
 	}()
 	return out
+}
+
+func verifyHeaders(h1, h2 data.Header) error {
+	if len(h1) != len(h2) {
+		return fmt.Errorf("header length mismatch (%v vs %v)", len(h1), len(h2))
+	}
+	for i, x := range h1 {
+		if h2[i] != x {
+			return fmt.Errorf("header mismatch in column %v (%v vs %v)", i, h2[i], x)
+		}
+	}
+	return nil
 }

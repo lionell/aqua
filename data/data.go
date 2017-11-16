@@ -28,3 +28,12 @@ func Bind(r Row, h Header) (map[string]Value, error) {
 	}
 	return res, nil
 }
+
+type Table struct {
+	Header
+	Rows []Row
+}
+
+func NewTable(h Header, r []Row) Table {
+	return Table{h, r}
+}

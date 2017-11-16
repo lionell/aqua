@@ -4,12 +4,11 @@ import (
 	"github.com/lionell/aqua/data"
 )
 
-func StartProducer(rows []data.Row, header ...string) data.Source {
-	out := data.NewSource(header)
-
+func StartProducer(t data.Table) data.Source {
+	out := data.NewSource(t.Header)
 	go func() {
 	Loop:
-		for _, r := range rows {
+		for _, r := range t.Rows {
 			select {
 			case out.Data <- r:
 			case <-out.Stop:
@@ -18,17 +17,15 @@ func StartProducer(rows []data.Row, header ...string) data.Source {
 		}
 		out.Signal()
 	}()
-
 	return out
 }
 
-func StartInfiniteProducer(rows []data.Row, header ...string) data.Source {
-	out := data.NewSource(header)
-
+func StartInfiniteProducer(t data.Table) data.Source {
+	out := data.NewSource(t.Header)
 	go func() {
 	Loop:
 		for {
-			for _, r := range rows {
+			for _, r := range t.Rows {
 				select {
 				case out.Data <- r:
 				case <-out.Stop:
@@ -38,6 +35,5 @@ func StartInfiniteProducer(rows []data.Row, header ...string) data.Source {
 		}
 		out.Signal()
 	}()
-
 	return out
 }

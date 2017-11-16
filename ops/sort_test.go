@@ -9,20 +9,20 @@ import (
 )
 
 func TestSortWithEmptySource(t *testing.T) {
-	ds := StartProducer(nil)
+	ds := StartProducer(NewTable([]string{"a"}, nil))
 	ds = Sort(ds, nil)
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, nil)
+	AssertEqualRows(t, res.Rows, nil)
 }
 
 func TestSortByOneColumn(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(7), I32(7)},
 		{I32(3), I32(4)},
 		{I32(0), I32(1)},
-	}
+	})
 	exp := []Row{
 		{I32(0), I32(1)},
 		{I32(1), I32(2)},
@@ -30,21 +30,21 @@ func TestSortByOneColumn(t *testing.T) {
 		{I32(7), I32(7)},
 	}
 
-	ds := StartProducer(rows, "a", "b")
+	ds := StartProducer(in)
 	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestSortByTwoColumns(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b", "c"}, []Row{
 		{I32(3), I32(8), I32(4)},
 		{I32(1), I32(1), I32(-21)},
 		{I32(3), I32(2), I32(-1)},
 		{I32(3), I32(4), I32(14)},
 		{I32(7), I32(7), I32(3)},
-	}
+	})
 	exp := []Row{
 		{I32(7), I32(7), I32(3)},
 		{I32(3), I32(2), I32(-1)},
@@ -53,20 +53,20 @@ func TestSortByTwoColumns(t *testing.T) {
 		{I32(1), I32(1), I32(-21)},
 	}
 
-	ds := StartProducer(rows, "a", "b", "c")
+	ds := StartProducer(in)
 	ds = Sort(ds, []SortingOrder{{"a", OrderDesc}, {"b", OrderAsc}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestSortWithEqualRows(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(7), I32(7)},
 		{I32(0), I32(1)},
 		{I32(1), I32(2)},
-	}
+	})
 	exp := []Row{
 		{I32(0), I32(1)},
 		{I32(1), I32(2)},
@@ -74,42 +74,42 @@ func TestSortWithEqualRows(t *testing.T) {
 		{I32(7), I32(7)},
 	}
 
-	ds := StartProducer(rows, "a", "b")
+	ds := StartProducer(in)
 	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
-	_, res := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res, exp)
+	AssertEqualRows(t, res.Rows, exp)
 }
 
 func TestSortCanStopOnReceivingData(t *testing.T) {
-	rows := []Row{
-		{I32(1), I32(2)},
-	}
+	in := NewTable([]string{"a"}, []Row{
+		{I32(1)},
+	})
 
-	ds := StartInfiniteProducer(rows, "a", "b")
+	ds := StartInfiniteProducer(in)
 	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	RunConsumerWithTimeout(ds, time.Millisecond*100)
 }
 
 func TestSortCanStopOnSendingResults(t *testing.T) {
-	rows := []Row{
+	in := NewTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(7), I32(7)},
 		{I32(0), I32(1)},
 		{I32(1), I32(2)},
-	}
+	})
 
-	ds := StartProducer(rows, "a", "b")
+	ds := StartProducer(in)
 	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEqualRows(t, res, rows[2:3])
+	AssertEqualRows(t, res.Rows, in.Rows[2:3])
 }
 
 func TestSortPreservesHeader(t *testing.T) {
-	ds := StartProducer(nil, "a", "b")
+	ds := StartProducer(NewTable([]string{"a", "b"}, nil))
 	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
-	h, _ := RunConsumer(ds)
+	res := RunConsumer(ds)
 
-	AssertEqualHeaders(t, h, []string{"a", "b"})
+	AssertEqualHeaders(t, res.Header, []string{"a", "b"})
 }
