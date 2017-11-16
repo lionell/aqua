@@ -1,4 +1,4 @@
-# Aqua
+# Aqua lang
 
 ![Travis CI status](https://travis-ci.org/lionell/aqua.svg?branch=master)
 
@@ -6,7 +6,7 @@
   <img width="300px" src="https://raw.githubusercontent.com/lionell/aqua/master/docs/logo.png" />
 </div>
 
-Rewrite aqua-lang in Go
+No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipedia.org/wiki/Jan_Cousteau).
 
 ## Features
 - [x] Lazy evaluation
