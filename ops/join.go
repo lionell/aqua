@@ -1,8 +1,8 @@
 package ops
 
 import (
-	"github.com/lionell/aqua/data"
 	"github.com/lionell/aqua/column"
+	"github.com/lionell/aqua/data"
 )
 
 func Join(in1 data.Source, in2 data.Source, cs []column.JoinCondition, t column.JoinType) data.Source {
@@ -100,4 +100,3 @@ func join(r1, r2 data.Row, cs []column.JoinCondition) data.Row {
 	// TODO(lionell): Implement this
 	return nil
 }
-

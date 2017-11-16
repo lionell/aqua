@@ -1,16 +1,16 @@
 package column
 
-type order int
+type Order int
 
 const (
-	_ order = iota
+	_ Order = iota
 	OrderAsc
 	OrderDesc
 )
 
-type Order struct {
-	Column int
-	Order  order
+type SortBy struct {
+	Column string
+	Order
 }
 
 type JoinType int

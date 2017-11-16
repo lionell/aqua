@@ -24,12 +24,10 @@ func Project(in data.Source, ds []column.Definition) data.Source {
 				m, err := data.Bind(r, in.Header)
 				if err != nil {
 					// TODO(lionell): Handle error
-					break
 				}
 				r, err = eval(ds, m)
 				if err != nil {
 					// TODO(lionell): Handle error
-					break
 				}
 				goOn = out.TrySend(r)
 			case <-in.Done:

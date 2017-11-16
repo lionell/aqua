@@ -21,12 +21,10 @@ func Where(in data.Source, c column.Condition) data.Source {
 				m, err := data.Bind(r, in.Header)
 				if err != nil {
 					// TODO(lionell): Handle error
-					break
 				}
 				ok, err := c.Check(m)
 				if err != nil {
 					// TODO(lionell): Handle error
-					break
 				}
 				if !ok {
 					continue
