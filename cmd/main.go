@@ -13,14 +13,13 @@ func main() {
 	log.SetOutput(ioutil.Discard)
 	//log.SetOutput(os.Stderr)
 
-	h := []string{"test", "test1", "test2"}
-	ds := jobs.NewRandomProducer(time.Millisecond * 15)
+	ds := jobs.NewRandomProducer(time.Millisecond * 15, "test1", "test2", "test3")
 	ds = ops.Take(ds, 10)
 	//ds, _ = ops.Where(ds, cond.NewFakeCondition(), h)
 	//ds = ops.Distinct(ds)
 	////ds = ops.Take(ds, 10)
 	////ds = ops.Sort(ds, []data.Order{{0, data.DESC}, {1, data.ASC}})
-	jobs.RunTabularWriter(os.Stdout, ds, h)
+	jobs.RunTabularWriter(os.Stdout, ds)
 
 	log.Println("[Main]: Finished.")
 }

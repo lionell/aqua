@@ -16,12 +16,8 @@ func (r Row) Equals(o Row) bool {
 	return true
 }
 
-func (r Row) str() string {
+func (r Row) toString() string {
 	return fmt.Sprintf("%#v", r)
-}
-
-func RowOf(vals ...Value) Row {
-	return Row(vals)
 }
 
 type RowSet struct {
@@ -29,15 +25,15 @@ type RowSet struct {
 }
 
 func (s RowSet) Put(r Row) {
-	s.m[r.str()] = true
+	s.m[r.toString()] = true
 }
 
 func (s RowSet) Has(r Row) bool {
-	return s.m[r.str()]
+	return s.m[r.toString()]
 }
 
 func (s RowSet) Remove(r Row) {
-	delete(s.m, r.str())
+	delete(s.m, r.toString())
 }
 
 func NewRowSet() RowSet {

@@ -10,7 +10,7 @@ import (
 var TakeCnt uint64 = 0
 
 func Take(in data.Source, cnt int) data.Source {
-	out := data.NewSource()
+	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Take %v]: ", atomic.AddUint64(&TakeCnt, 1))
 
 	go func() {
@@ -22,14 +22,9 @@ func Take(in data.Source, cnt int) data.Source {
 			case r := <-in.Data:
 				cnt--
 				goOn = out.TrySend(r)
-				//select {
-				//case out.Data <- r:
-				//case <-out.Stop:
-				//	break Loop
-				//}
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
-				in.SetFinalized()
+				in.MarkFinalized()
 				goOn = false
 			case <-out.Stop:
 				goOn = false

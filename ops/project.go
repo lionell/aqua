@@ -10,20 +10,23 @@ import (
 
 var ProjectCnt uint64 = 0
 
-func Project(in data.Source, h data.Header, es []column.Expression) data.Source {
-	out := data.NewSource()
+func Project(in data.Source, ds []column.Definition) data.Source {
+	var h data.Header
+	for _, d := range ds {
+		h = append(h, d.Name)
+	}
+	out := data.NewSource(h)
 	id := fmt.Sprintf("[Project %v]: ", atomic.AddUint64(&ProjectCnt, 1))
-
 	go func() {
 		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
-				m, err := data.Bind(r, h)
+				m, err := data.Bind(r, in.Header)
 				if err != nil {
 					// TODO(lionell): Handle error
 					break
 				}
-				r, err = eval(es, m)
+				r, err = eval(ds, m)
 				if err != nil {
 					// TODO(lionell): Handle error
 					break
@@ -31,7 +34,7 @@ func Project(in data.Source, h data.Header, es []column.Expression) data.Source 
 				goOn = out.TrySend(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
-				in.SetFinalized()
+				in.MarkFinalized()
 				goOn = false
 			case <-out.Stop:
 				goOn = false
@@ -40,14 +43,13 @@ func Project(in data.Source, h data.Header, es []column.Expression) data.Source 
 		in.Finalize()
 		out.Signal()
 	}()
-
 	return out
 }
 
-func eval(es []column.Expression, m map[string]data.Value) (data.Row, error) {
-	r := data.Row{}
-	for _, e := range es {
-		v, err := e.Eval(m)
+func eval(ds []column.Definition, m map[string]data.Value) (data.Row, error) {
+	var r data.Row
+	for _, d := range ds {
+		v, err := d.Eval(m)
 		if err != nil {
 			return nil, err
 		}

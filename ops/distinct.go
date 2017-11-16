@@ -10,9 +10,8 @@ import (
 var DistinctCnt uint64 = 0
 
 func Distinct(in data.Source) data.Source {
-	out := data.NewSource()
+	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Distinct %v]: ", atomic.AddUint64(&DistinctCnt, 1))
-
 	go func() {
 		s := data.NewRowSet()
 		for goOn := true; goOn; {
@@ -26,7 +25,7 @@ func Distinct(in data.Source) data.Source {
 				goOn = out.TrySend(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
-				in.SetFinalized()
+				in.MarkFinalized()
 				goOn = false
 			case <-out.Stop:
 				goOn = false
@@ -36,6 +35,5 @@ func Distinct(in data.Source) data.Source {
 		log.Println(id + "Finished.")
 		out.Signal()
 	}()
-
 	return out
 }

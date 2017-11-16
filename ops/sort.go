@@ -12,7 +12,7 @@ import (
 var SortCnt uint64 = 0
 
 func Sort(in data.Source, orders []column.Order) data.Source {
-	out := data.NewSource()
+	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Sort %v]: ", atomic.AddUint64(&SortCnt, 1))
 
 	go func() {
@@ -23,7 +23,7 @@ func Sort(in data.Source, orders []column.Order) data.Source {
 			case r := <-in.Data:
 				rows = append(rows, r)
 			case <-in.Done:
-				in.SetFinalized()
+				in.MarkFinalized()
 				log.Println(id + "Sorting...")
 				sort.Sort(withOrder{rows, orders})
 				for _, r := range rows {
@@ -68,13 +68,13 @@ func (wo withOrder) Less(i, j int) bool {
 	for _, o := range wo.orders {
 		c := o.Column
 		switch o.Order {
-		case column.ASC:
+		case column.OrderAsc:
 			if r1[c].Less(r2[c]) {
 				return true
 			} else if r2[c].Less(r1[c]) {
 				return false
 			}
-		case column.DESC:
+		case column.OrderDesc:
 			if r1[c].Less(r2[c]) {
 				return false
 			} else if r2[c].Less(r1[c]) {

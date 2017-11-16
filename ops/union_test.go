@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+// TODO(lionell): Test header
+
 func TestUnionWhenFirstSourceIsEmpty(t *testing.T) {
 	rows := []Row{
 		{I32(1), I32(2)},

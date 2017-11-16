@@ -4,8 +4,8 @@ import (
 	"github.com/lionell/aqua/data"
 )
 
-func StartProducer(rows []data.Row) data.Source {
-	out := data.NewSource()
+func StartProducer(rows []data.Row, header ...string) data.Source {
+	out := data.NewSource(header)
 
 	go func() {
 	Loop:
@@ -22,8 +22,8 @@ func StartProducer(rows []data.Row) data.Source {
 	return out
 }
 
-func StartInfiniteProducer(rows []data.Row) data.Source {
-	out := data.NewSource()
+func StartInfiniteProducer(rows []data.Row, header ...string) data.Source {
+	out := data.NewSource(header)
 
 	go func() {
 	Loop:

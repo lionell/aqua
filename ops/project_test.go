@@ -8,6 +8,7 @@ import (
 )
 
 // TODO(lionell): Test for errors
+// TODO(lionell): Test header
 
 func TestProjectColumnOnItself(t *testing.T) {
 	rows := []Row{
@@ -15,8 +16,8 @@ func TestProjectColumnOnItself(t *testing.T) {
 		{I32(2)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test"}, []Expression{NewSumExpression("test")})
+	ds := StartProducer(rows, "a")
+	ds = Project(ds, []Definition{{"a", NewSumExpression("a")}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, rows)
@@ -32,8 +33,8 @@ func TestProjectSumOfColumns(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test1", "test2"}, []Expression{NewSumExpression("test1", "test2")})
+	ds := StartProducer(rows, "a", "b")
+	ds = Project(ds, []Definition{{"c", NewSumExpression("a", "b")}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -49,8 +50,8 @@ func TestProjectDoesNotIncludeUnnecessaryColumns(t *testing.T) {
 		{I32(2)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Project(ds, []string{"test1", "test2"}, []Expression{NewSumExpression("test1")})
+	ds := StartProducer(rows, "a", "b")
+	ds = Project(ds, []Definition{{"c", NewSumExpression("a")}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -65,8 +66,8 @@ func TestProjectCanStop(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(rows)
-	ds = Project(ds, []string{"test"}, []Expression{NewSumExpression("test")})
+	ds := StartInfiniteProducer(rows, "a")
+	ds = Project(ds, []Definition{{"a", NewSumExpression("a")}})
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEquals(t, res, exp)

@@ -8,11 +8,11 @@ import (
 	"text/tabwriter"
 )
 
-func RunTabularWriter(out io.Writer, ds data.Source, h data.Header) {
+func RunTabularWriter(out io.Writer, ds data.Source) {
 	w := tabwriter.NewWriter(out, 0, 0, 3, ' ', tabwriter.AlignRight)
 	defer w.Flush()
 
-	writeHeader(w, h)
+	writeHeader(w, ds.Header)
 Loop:
 	for {
 		select {

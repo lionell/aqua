@@ -1,13 +1,14 @@
 package data
 
 type Source struct {
+	Header
 	Data chan Row
 	Stop chan struct{}
 	Done chan struct{}
 }
 
-func NewSource() Source {
-	return Source{make(chan Row), make(chan struct{}), make(chan struct{})}
+func NewSource(header []string) Source {
+	return Source{header, make(chan Row), make(chan struct{}), make(chan struct{}, 1)}
 }
 
 func (s Source) Finalize() {
@@ -25,7 +26,7 @@ func (s Source) IsFinalized() bool {
 	return s.Stop == nil
 }
 
-func (s *Source) SetFinalized() {
+func (s *Source) MarkFinalized() {
 	s.Stop = nil
 }
 

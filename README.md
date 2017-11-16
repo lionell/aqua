@@ -24,3 +24,4 @@ Rewrite aqua-lang in Go
 - [ ] Error handling
 - [ ] CLI
 - [ ] Add more datatypes(float64, string, char)
+- [ ] Implement fuzzy union (faster, no order)

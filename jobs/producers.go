@@ -11,26 +11,25 @@ import (
 
 var ProdCnt uint64 = 0
 
-func NewRandomProducer(d time.Duration) data.Source {
-	out := data.NewSource()
+func NewRandomProducer(d time.Duration, header ...string) data.Source {
+	out := data.NewSource(header)
 	id := fmt.Sprintf("[Prod %v]: ", atomic.AddUint64(&ProdCnt, 1))
-
 	go func() {
-	Loop:
-		for {
-			r := data.RowOf(data.I32(rand.Intn(30)), data.I32(rand.Intn(30)), data.I32(rand.Intn(30)))
-			//r := data.RowOf(data.I32(rand.Intn(30)))
+		for goOn := true; goOn; {
+			var r data.Row
+			for i := 0; i < len(header); i++ {
+				r = append(r, data.I32(rand.Intn(30)))
+			}
 			select {
 			case out.Data <- r:
 				log.Printf(id+"Send %v\n", r)
 				time.Sleep(d)
 			case <-out.Stop:
-				break Loop
+				goOn = false
 			}
 		}
 		log.Println(id + "Finished.")
-		out.Done <- struct{}{}
+		out.Signal()
 	}()
-
 	return out
 }

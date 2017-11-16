@@ -44,7 +44,7 @@ func TestSortByOneColumn(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []Order{{0, ASC}})
+	ds = Sort(ds, []Order{{0, OrderAsc}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -67,7 +67,7 @@ func TestSortByTwoColumns(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []Order{{0, DESC}, {1, ASC}})
+	ds = Sort(ds, []Order{{0, OrderDesc}, {1, OrderAsc}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -88,7 +88,7 @@ func TestSortWithEqualRows(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []Order{{0, ASC}})
+	ds = Sort(ds, []Order{{0, OrderAsc}})
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, exp)
@@ -100,7 +100,7 @@ func TestSortCanStopOnReceivingData(t *testing.T) {
 	}
 
 	ds := StartInfiniteProducer(rows)
-	ds = Sort(ds, []Order{{0, ASC}})
+	ds = Sort(ds, []Order{{0, OrderAsc}})
 	RunConsumerWithTimeout(ds, time.Millisecond*100)
 }
 
@@ -113,7 +113,7 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 	}
 
 	ds := StartProducer(rows)
-	ds = Sort(ds, []Order{{0, ASC}})
+	ds = Sort(ds, []Order{{0, OrderAsc}})
 	res := RunConsumerWithLimit(ds, 1)
 
 	AssertEquals(t, res, rows[2:3])

@@ -10,15 +10,15 @@ import (
 
 var WhereCnt uint64 = 0
 
-func Where(in data.Source, h data.Header, c column.Condition) data.Source {
-	out := data.NewSource()
+func Where(in data.Source, c column.Condition) data.Source {
+	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Where %v]: ", atomic.AddUint64(&WhereCnt, 1))
 
 	go func() {
 		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
-				m, err := data.Bind(r, h)
+				m, err := data.Bind(r, in.Header)
 				if err != nil {
 					// TODO(lionell): Handle error
 					break
@@ -34,7 +34,7 @@ func Where(in data.Source, h data.Header, c column.Condition) data.Source {
 				goOn = out.TrySend(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
-				in.SetFinalized()
+				in.MarkFinalized()
 				goOn = false
 			case <-out.Stop:
 				goOn = false

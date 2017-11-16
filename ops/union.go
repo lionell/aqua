@@ -10,9 +10,11 @@ import (
 var UnionCnt uint64 = 0
 
 func Union(in1, in2 data.Source) data.Source {
-	out := data.NewSource()
+	var h data.Header
+	h = append(h, in1.Header...)
+	h = append(h, in2.Header...)
+	out := data.NewSource(h)
 	id := fmt.Sprintf("[Union %v]: ", atomic.AddUint64(&UnionCnt, 1))
-
 	go func() {
 		for goOn := true; goOn; {
 			select {
@@ -20,14 +22,14 @@ func Union(in1, in2 data.Source) data.Source {
 				goOn = out.TrySend(r)
 			case <-in1.Done:
 				log.Println(id + "First source is empty.")
-				in1.SetFinalized()
+				in1.MarkFinalized()
 				for goOn {
 					select {
 					case r := <-in2.Data:
 						goOn = out.TrySend(r)
 					case <-in2.Done:
 						log.Println(id + "Second source is empty.")
-						in2.SetFinalized()
+						in2.MarkFinalized()
 						goOn = false
 					case <-out.Stop:
 						goOn = false
@@ -42,6 +44,5 @@ func Union(in1, in2 data.Source) data.Source {
 		in2.Finalize()
 		out.Signal()
 	}()
-
 	return out
 }

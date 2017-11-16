@@ -7,6 +7,7 @@ import (
 )
 
 // TODO(lionell): Test for errors
+// TODO(lionell): Test header
 
 func TestWhereTakeFirstRows(t *testing.T) {
 	rows := []Row{
@@ -14,8 +15,8 @@ func TestWhereTakeFirstRows(t *testing.T) {
 		{I32(2)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Where(ds, []string{"ignored"}, NewTrueConditionWithLimit(1))
+	ds := StartProducer(rows, "a")
+	ds = Where(ds, NewTrueConditionWithLimit(1))
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, rows[:1])
@@ -27,8 +28,8 @@ func TestWhereWithAlwaysFalseCondition(t *testing.T) {
 		{I32(2)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Where(ds, []string{"ignored"}, NewTrueConditionWithLimit(0))
+	ds := StartProducer(rows, "a")
+	ds = Where(ds, NewTrueConditionWithLimit(0))
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, nil)
@@ -41,8 +42,8 @@ func TestWhereMapsHeaderCorrectly(t *testing.T) {
 		{I32(2), I32(9)},
 	}
 
-	ds := StartProducer(rows)
-	ds = Where(ds, []string{"test", "ignore"}, NewOddCondition("test"))
+	ds := StartProducer(rows, "a", "ignored")
+	ds = Where(ds, NewOddCondition("a"))
 	res := RunConsumer(ds)
 
 	AssertEquals(t, res, rows[1:2])
@@ -57,8 +58,8 @@ func TestWhereCanStop(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(rows)
-	ds = Where(ds, []string{"ignored"}, NewTrueConditionWithLimit(5))
+	ds := StartInfiniteProducer(rows, "a")
+	ds = Where(ds, NewTrueConditionWithLimit(5))
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEquals(t, res, exp)
