@@ -31,7 +31,7 @@ func TestSortByOneColumn(t *testing.T) {
 	}
 
 	ds := StartProducer(rows, "a", "b")
-	ds = Sort(ds, []SortBy{{"a", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	_, res := RunConsumer(ds)
 
 	AssertEqualRows(t, res, exp)
@@ -54,7 +54,7 @@ func TestSortByTwoColumns(t *testing.T) {
 	}
 
 	ds := StartProducer(rows, "a", "b", "c")
-	ds = Sort(ds, []SortBy{{"a", OrderDesc}, {"b", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderDesc}, {"b", OrderAsc}})
 	_, res := RunConsumer(ds)
 
 	AssertEqualRows(t, res, exp)
@@ -75,7 +75,7 @@ func TestSortWithEqualRows(t *testing.T) {
 	}
 
 	ds := StartProducer(rows, "a", "b")
-	ds = Sort(ds, []SortBy{{"a", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	_, res := RunConsumer(ds)
 
 	AssertEqualRows(t, res, exp)
@@ -87,7 +87,7 @@ func TestSortCanStopOnReceivingData(t *testing.T) {
 	}
 
 	ds := StartInfiniteProducer(rows, "a", "b")
-	ds = Sort(ds, []SortBy{{"a", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	RunConsumerWithTimeout(ds, time.Millisecond*100)
 }
 
@@ -100,7 +100,7 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 	}
 
 	ds := StartProducer(rows, "a", "b")
-	ds = Sort(ds, []SortBy{{"a", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	res := RunConsumerWithLimit(ds, 1)
 
 	AssertEqualRows(t, res, rows[2:3])
@@ -108,7 +108,7 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 
 func TestSortPreservesHeader(t *testing.T) {
 	ds := StartProducer(nil, "a", "b")
-	ds = Sort(ds, []SortBy{{"a", OrderAsc}})
+	ds = Sort(ds, []SortingOrder{{"a", OrderAsc}})
 	h, _ := RunConsumer(ds)
 
 	AssertEqualHeaders(t, h, []string{"a", "b"})

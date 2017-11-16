@@ -11,7 +11,7 @@ import (
 
 var SortCnt uint64 = 0
 
-func Sort(in data.Source, orders []column.SortBy) data.Source {
+func Sort(in data.Source, so []column.SortingOrder) data.Source {
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Sort %v]: ", atomic.AddUint64(&SortCnt, 1))
 	go func() {
@@ -23,7 +23,7 @@ func Sort(in data.Source, orders []column.SortBy) data.Source {
 			case <-in.Done:
 				in.MarkFinalized()
 				log.Println(id + "Sorting...")
-				o, err := convert(orders, in.Header)
+				o, err := indexOrders(so, in.Header)
 				if err != nil {
 					// TODO(lionell): Handle error.
 				}
@@ -45,26 +45,26 @@ func Sort(in data.Source, orders []column.SortBy) data.Source {
 	return out
 }
 
-type indexAndOrder struct {
+type order struct {
 	index int
 	order column.Order
 }
 
-func convert(orders []column.SortBy, h data.Header) ([]indexAndOrder, error) {
-	var res []indexAndOrder
-	for _, o := range orders {
+func indexOrders(so []column.SortingOrder, h data.Header) ([]order, error) {
+	var res []order
+	for _, o := range so {
 		i, err := h.Find(o.Column)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can't find order column %v in the header %v", o.Column, h)
 		}
-		res = append(res, indexAndOrder{i, o.Order})
+		res = append(res, order{i, o.Order})
 	}
 	return res, nil
 }
 
 type byOrders struct {
 	rows   []data.Row
-	orders []indexAndOrder
+	orders []order
 }
 
 func (bo byOrders) Len() int {

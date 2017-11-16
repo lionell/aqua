@@ -8,7 +8,7 @@ const (
 	OrderDesc
 )
 
-type SortBy struct {
+type SortingOrder struct {
 	Column string
 	Order
 }
@@ -24,5 +24,5 @@ const (
 )
 
 type JoinCondition struct {
-	LeftColumn, RightColumn int
+	LeftColumn, RightColumn string
 }
