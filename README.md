@@ -1,5 +1,7 @@
 # Aqua
 
+![Travis CI status](https://travis-ci.org/lionell/aqua.svg?branch=master)
+
 Rewrite aqua-lang in Go
 
 ## Features
