@@ -6,8 +6,7 @@ import (
 	"testing"
 )
 
-// TODO(lionell): Test for errors
-// TODO(lionell): Test header
+// TODO(lionell): Test for errors.
 
 func TestWhereTakeFirstRows(t *testing.T) {
 	rows := []Row{
@@ -17,9 +16,9 @@ func TestWhereTakeFirstRows(t *testing.T) {
 
 	ds := StartProducer(rows, "a")
 	ds = Where(ds, NewTrueConditionWithLimit(1))
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows[:1])
+	AssertEqualRows(t, res, rows[:1])
 }
 
 func TestWhereWithAlwaysFalseCondition(t *testing.T) {
@@ -30,9 +29,9 @@ func TestWhereWithAlwaysFalseCondition(t *testing.T) {
 
 	ds := StartProducer(rows, "a")
 	ds = Where(ds, NewTrueConditionWithLimit(0))
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, nil)
+	AssertEqualRows(t, res, nil)
 }
 
 func TestWhereMapsHeaderCorrectly(t *testing.T) {
@@ -44,9 +43,9 @@ func TestWhereMapsHeaderCorrectly(t *testing.T) {
 
 	ds := StartProducer(rows, "a", "ignored")
 	ds = Where(ds, NewOddCondition("a"))
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows[1:2])
+	AssertEqualRows(t, res, rows[1:2])
 }
 
 func TestWhereCanStop(t *testing.T) {
@@ -62,5 +61,13 @@ func TestWhereCanStop(t *testing.T) {
 	ds = Where(ds, NewTrueConditionWithLimit(5))
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
+}
+
+func TestWherePreservesHeader(t *testing.T) {
+	ds := StartProducer(nil, "a", "b")
+	ds = Where(ds, NewOddCondition("a"))
+	h, _ := RunConsumer(ds)
+
+	AssertEqualHeaders(t, h, []string{"a", "b"})
 }

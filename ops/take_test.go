@@ -6,14 +6,12 @@ import (
 	"testing"
 )
 
-// TODO(lionell): Test header
-
 func TestTakeStopsWhenSourceIsEmpty(t *testing.T) {
 	ds := StartProducer(nil)
 	ds = Take(ds, 10)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, nil)
+	AssertEqualRows(t, res, nil)
 }
 
 func TestTakeWhenRowsLessThanLimit(t *testing.T) {
@@ -23,9 +21,9 @@ func TestTakeWhenRowsLessThanLimit(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Take(ds, 10)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
@@ -36,9 +34,9 @@ func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Take(ds, 2)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
@@ -49,9 +47,9 @@ func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Take(ds, 1)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows[:1])
+	AssertEqualRows(t, res, rows[:1])
 }
 
 func TestTakeCanStop(t *testing.T) {
@@ -64,5 +62,13 @@ func TestTakeCanStop(t *testing.T) {
 	ds = Take(ds, 10)
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEquals(t, res, rows[:1])
+	AssertEqualRows(t, res, rows[:1])
+}
+
+func TestTakePreservesHeader(t *testing.T) {
+	ds := StartProducer(nil, "a", "b")
+	ds = Take(ds, 10)
+	h, _ := RunConsumer(ds)
+
+	AssertEqualHeaders(t, h, []string{"a", "b"})
 }

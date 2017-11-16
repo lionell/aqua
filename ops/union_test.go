@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// TODO(lionell): Test header
+// TODO(lionell): Test union throws error when headers don't match.
 
 func TestUnionWhenFirstSourceIsEmpty(t *testing.T) {
 	rows := []Row{
@@ -17,9 +17,9 @@ func TestUnionWhenFirstSourceIsEmpty(t *testing.T) {
 	ds1 := StartProducer(nil)
 	ds2 := StartProducer(rows)
 	ds := Union(ds1, ds2)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestUnionWhenSecondSourceIsEmpty(t *testing.T) {
@@ -31,18 +31,18 @@ func TestUnionWhenSecondSourceIsEmpty(t *testing.T) {
 	ds1 := StartProducer(rows)
 	ds2 := StartProducer(nil)
 	ds := Union(ds1, ds2)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestUnionWhenBothSourcesAreEmpty(t *testing.T) {
 	ds1 := StartProducer(nil)
 	ds2 := StartProducer(nil)
 	ds := Union(ds1, ds2)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, nil)
+	AssertEqualRows(t, res, nil)
 }
 
 func TestUnionReturnsDataInCorrectOrder(t *testing.T) {
@@ -61,9 +61,9 @@ func TestUnionReturnsDataInCorrectOrder(t *testing.T) {
 	ds1 := StartProducer(rows1)
 	ds2 := StartProducer(rows2)
 	ds := Union(ds1, ds2)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
 }
 
 func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
@@ -77,7 +77,7 @@ func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
 	ds := Union(ds1, ds2)
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
@@ -91,5 +91,14 @@ func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
 	ds := Union(ds1, ds2)
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
+}
+
+func TestUnionPreservesHeader(t *testing.T) {
+	ds1 := StartProducer(nil, "a", "b")
+	ds2 := StartProducer(nil, "a", "b")
+	ds := Union(ds1, ds2)
+	h, _ := RunConsumer(ds)
+
+	AssertEqualHeaders(t, h, []string{"a", "b"})
 }

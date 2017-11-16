@@ -83,7 +83,8 @@ func Join(in1 data.Source, in2 data.Source, cs []column.JoinCondition, t column.
 }
 
 func generateHeader(h1, h2 data.Header, cs []column.JoinCondition) data.Header {
-	return h1
+	// TODO(lionell): Implement this
+	return nil
 }
 
 func satisfy(r1, r2 data.Row, cs []column.JoinCondition) bool {
@@ -96,6 +97,7 @@ func satisfy(r1, r2 data.Row, cs []column.JoinCondition) bool {
 }
 
 func join(r1, r2 data.Row, cs []column.JoinCondition) data.Row {
-	return r1
+	// TODO(lionell): Implement this
+	return nil
 }
 

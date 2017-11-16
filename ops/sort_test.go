@@ -16,17 +16,17 @@ func TestSortWithoutOrder(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Sort(ds, nil)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestSortWithEmptySource(t *testing.T) {
 	ds := StartProducer(nil)
 	ds = Sort(ds, nil)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, nil)
+	AssertEqualRows(t, res, nil)
 }
 
 func TestSortByOneColumn(t *testing.T) {
@@ -45,9 +45,9 @@ func TestSortByOneColumn(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Sort(ds, []Order{{0, OrderAsc}})
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
 }
 
 func TestSortByTwoColumns(t *testing.T) {
@@ -68,9 +68,9 @@ func TestSortByTwoColumns(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Sort(ds, []Order{{0, OrderDesc}, {1, OrderAsc}})
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
 }
 
 func TestSortWithEqualRows(t *testing.T) {
@@ -89,9 +89,9 @@ func TestSortWithEqualRows(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Sort(ds, []Order{{0, OrderAsc}})
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
 }
 
 func TestSortCanStopOnReceivingData(t *testing.T) {
@@ -116,5 +116,13 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 	ds = Sort(ds, []Order{{0, OrderAsc}})
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEquals(t, res, rows[2:3])
+	AssertEqualRows(t, res, rows[2:3])
+}
+
+func TestSortPreservesHeader(t *testing.T) {
+	ds := StartProducer(nil, "a", "b")
+	ds = Sort(ds, []Order{{0, OrderAsc}})
+	h, _ := RunConsumer(ds)
+
+	AssertEqualHeaders(t, h, []string{"a", "b"})
 }

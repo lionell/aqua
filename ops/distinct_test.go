@@ -9,9 +9,9 @@ import (
 func TestDistinctWithEmptySource(t *testing.T) {
 	ds := StartProducer(nil)
 	ds = Distinct(ds)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, nil)
+	AssertEqualRows(t, res, nil)
 }
 
 func TestDistinctWhenRowsAreDifferent(t *testing.T) {
@@ -22,9 +22,9 @@ func TestDistinctWhenRowsAreDifferent(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Distinct(ds)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows)
+	AssertEqualRows(t, res, rows)
 }
 
 func TestDistinctWithEqualRows(t *testing.T) {
@@ -36,9 +36,9 @@ func TestDistinctWithEqualRows(t *testing.T) {
 
 	ds := StartProducer(rows)
 	ds = Distinct(ds)
-	res := RunConsumer(ds)
+	_, res := RunConsumer(ds)
 
-	AssertEquals(t, res, rows[:2])
+	AssertEqualRows(t, res, rows[:2])
 }
 
 func TestDistinctCanStop(t *testing.T) {
@@ -54,5 +54,13 @@ func TestDistinctCanStop(t *testing.T) {
 	ds = Distinct(ds)
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEquals(t, res, exp)
+	AssertEqualRows(t, res, exp)
+}
+
+func TestDistinctPreservesHeader(t *testing.T) {
+	ds := StartProducer(nil, "a", "b")
+	ds = Distinct(ds)
+	h, _ := RunConsumer(ds)
+
+	AssertEqualHeaders(t, h, []string{"a", "b"})
 }

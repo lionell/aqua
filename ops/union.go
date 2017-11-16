@@ -10,10 +10,8 @@ import (
 var UnionCnt uint64 = 0
 
 func Union(in1, in2 data.Source) data.Source {
-	var h data.Header
-	h = append(h, in1.Header...)
-	h = append(h, in2.Header...)
-	out := data.NewSource(h)
+	// TODO(lionell): Verify that in1.Header == in2.Header
+	out := data.NewSource(in1.Header)
 	id := fmt.Sprintf("[Union %v]: ", atomic.AddUint64(&UnionCnt, 1))
 	go func() {
 		for goOn := true; goOn; {
