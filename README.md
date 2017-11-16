@@ -3,7 +3,7 @@
 ![Travis CI status](https://travis-ci.org/lionell/aqua.svg?branch=master)
 
 <div align="center">
-  <img width="300px" src="https://raw.githubusercontent.com/lionell/aqua/master/docs/logo.jpg" />
+  <img width="300px" src="https://raw.githubusercontent.com/lionell/aqua/master/docs/logo.png" />
 </div>
 
 Rewrite aqua-lang in Go
