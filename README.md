@@ -1,6 +1,6 @@
 # Aqua lang
 
-![Travis CI status](https://travis-ci.org/lionell/aqua.svg?branch=master)
+[![Build Status](https://travis-ci.org/lionell/aqua.svg?branch=master)](https://travis-ci.org/lionell/aqua)
 
 <div align="center">
   <img width="300px" src="https://raw.githubusercontent.com/lionell/aqua/master/docs/logo.png" />
