@@ -34,7 +34,7 @@ func (s Source) Signal() {
 	s.Done <- struct{}{}
 }
 
-func (s Source) TrySend(r Row) bool {
+func (s Source) Send(r Row) bool {
 	select {
 	case s.Data <- r:
 		return true

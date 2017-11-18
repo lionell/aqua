@@ -13,7 +13,6 @@ var WhereCnt uint64 = 0
 func Where(in data.Source, c column.Condition) data.Source {
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Where %v]: ", atomic.AddUint64(&WhereCnt, 1))
-
 	go func() {
 		for goOn := true; goOn; {
 			select {
@@ -29,7 +28,7 @@ func Where(in data.Source, c column.Condition) data.Source {
 				if !ok {
 					continue
 				}
-				goOn = out.TrySend(r)
+				goOn = out.Send(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.MarkFinalized()
@@ -42,6 +41,5 @@ func Where(in data.Source, c column.Condition) data.Source {
 		log.Println(id + "Finished.")
 		out.Signal()
 	}()
-
 	return out
 }

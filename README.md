@@ -24,10 +24,10 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [x] Project
 - [x] Where (tests)
 - [x] Project (tests)
-- [ ] Join
-- [ ] Join (tests)
-- [ ] Refactor jobs package to cons/prod
+- [x] Join
+- [x] Join (tests)
 - [ ] Error handling
+- [ ] Refactor jobs package to cons/prod
 - [ ] CLI
 - [ ] Add more datatypes(float64, string, char)
 - [ ] Implement fuzzy union (faster, no order)

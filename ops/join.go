@@ -1,13 +1,13 @@
 package ops
 
 import (
+	"fmt"
 	"github.com/lionell/aqua/column"
 	"github.com/lionell/aqua/data"
-	"fmt"
 )
 
 func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.JoinType) data.Source {
-	out := data.NewSource(generateHeader(in1.Header, in2.Header, jc))
+	out := data.NewSource(generateHeader(in1.Header, in2.Header))
 	go func() {
 		var d1, d2 []data.Row
 		s1 := data.NewRowSet()
@@ -16,7 +16,8 @@ func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.
 		if err != nil {
 			// TODO(lionell): Handle error.
 		}
-		for goOn := true; goOn; {
+		goOn := true
+		for goOn && (!in1.IsFinalized() || !in2.IsFinalized()) {
 			select {
 			case r1 := <-in1.Data:
 				d1 = append(d1, r1)
@@ -26,8 +27,9 @@ func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.
 					}
 					s1.Put(r1)
 					s2.Put(r2)
-					n := join(r1, r2, ic)
-					if goOn = out.TrySend(n); !goOn {
+					var n []data.Value
+					n = append(append(n, r1...), r2...)
+					if goOn = out.Send(n); !goOn {
 						break
 					}
 				}
@@ -39,45 +41,46 @@ func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.
 					}
 					s1.Put(r1)
 					s2.Put(r2)
-					n := join(r1, r2, ic)
-					if goOn = out.TrySend(n); !goOn {
+					var n []data.Value
+					n = append(append(n, r1...), r2...)
+					if goOn = out.Send(n); !goOn {
 						break
 					}
 				}
 			case <-in1.Done:
 				in1.MarkFinalized()
-				switch t {
-				case column.JoinLeft, column.JoinFull:
-					for _, r := range d1 {
-						if s1.Has(r) {
-							continue
-						}
-						n := join(r, nil, ic)
-						if goOn = out.TrySend(n); !goOn {
-							break
-						}
-					}
-				case column.JoinInner:
-					goOn = false
-				}
 			case <-in2.Done:
 				in2.MarkFinalized()
-				switch t {
-				case column.JoinRight, column.JoinFull:
-					for _, r := range d2 {
-						if s2.Has(r) {
-							continue
-						}
-						n := join(r, nil, ic)
-						if goOn = out.TrySend(n); !goOn {
-							break
-						}
-					}
-				case column.JoinInner:
-					goOn = false
-				}
 			case <-out.Stop:
 				goOn = false
+			}
+		}
+		if goOn {
+			// Handle not matched rows
+			if t == column.JoinLeft || t == column.JoinFull {
+				for _, r := range d1 {
+					if s1.Has(r) {
+						continue
+					}
+					// Make row [r..., none, none, ...]
+					var n []data.Value
+					n = append(append(n, r...), makeNoneRow(len(in2.Header))...)
+					if goOn = out.Send(n); !goOn {
+						break
+					}
+				}
+			}
+			if t == column.JoinRight || t == column.JoinFull {
+				for _, r := range d2 {
+					if s2.Has(r) {
+						continue
+					}
+					// Make row [none, none, ..., r...]
+					n := append(makeNoneRow(len(in1.Header)), r...)
+					if goOn = out.Send(n); !goOn {
+						break
+					}
+				}
 			}
 		}
 		in1.Finalize()
@@ -85,11 +88,6 @@ func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.
 		out.Signal()
 	}()
 	return out
-}
-
-func generateHeader(h1, h2 data.Header, cs []column.JoinCondition) data.Header {
-	// TODO(lionell): Implement this.
-	return nil
 }
 
 type condition struct {
@@ -121,7 +119,23 @@ func satisfy(r1, r2 data.Row, ic []condition) bool {
 	return true
 }
 
-func join(r1, r2 data.Row, ic []condition) data.Row {
-	// TODO(lionell): Implement this.
-	return nil
+func generateHeader(h1, h2 data.Header) data.Header {
+	var res []string
+	res = append(append(res, h1...), h2...)
+	u := make(map[string]bool)
+	for i, x := range res {
+		if u[x] {
+			res[i] = "$" + res[i]
+		}
+		u[x] = true
+	}
+	return res
+}
+
+func makeNoneRow(length int) data.Row {
+	r := make([]data.Value, length)
+	for i := range r {
+		r[i] = data.None{}
+	}
+	return r
 }

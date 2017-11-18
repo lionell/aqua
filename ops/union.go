@@ -19,14 +19,14 @@ func Union(in1, in2 data.Source) data.Source {
 		for goOn := true; goOn; {
 			select {
 			case r := <-in1.Data:
-				goOn = out.TrySend(r)
+				goOn = out.Send(r)
 			case <-in1.Done:
 				log.Println(id + "First source is empty.")
 				in1.MarkFinalized()
 				for goOn {
 					select {
 					case r := <-in2.Data:
-						goOn = out.TrySend(r)
+						goOn = out.Send(r)
 					case <-in2.Done:
 						log.Println(id + "Second source is empty.")
 						in2.MarkFinalized()

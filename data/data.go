@@ -34,6 +34,6 @@ type Table struct {
 	Rows []Row
 }
 
-func NewTable(h Header, r []Row) Table {
+func MakeTable(h Header, r []Row) Table {
 	return Table{h, r}
 }

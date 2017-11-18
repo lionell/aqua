@@ -29,7 +29,7 @@ func Project(in data.Source, ds []column.Definition) data.Source {
 				if err != nil {
 					// TODO(lionell): Handle error
 				}
-				goOn = out.TrySend(r)
+				goOn = out.Send(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.MarkFinalized()

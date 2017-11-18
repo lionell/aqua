@@ -7,15 +7,15 @@ import (
 )
 
 func TestDistinctWithEmptySource(t *testing.T) {
-	ds := StartProducer(NewTable([]string{"a"}, nil))
+	ds := StartProducer(MakeTable([]string{"a"}, nil))
 	ds = Distinct(ds)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, nil)
+	AssertEqualRowsInOrder(t, res.Rows, nil)
 }
 
 func TestDistinctWhenRowsAreDifferent(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	})
@@ -24,11 +24,11 @@ func TestDistinctWhenRowsAreDifferent(t *testing.T) {
 	ds = Distinct(ds)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows)
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
 }
 
 func TestDistinctWithEqualRows(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 		{I32(1), I32(2)},
@@ -38,11 +38,11 @@ func TestDistinctWithEqualRows(t *testing.T) {
 	ds = Distinct(ds)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows[:2])
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:2])
 }
 
 func TestDistinctCanStop(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	})
@@ -54,11 +54,11 @@ func TestDistinctCanStop(t *testing.T) {
 	ds = Distinct(ds)
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEqualRows(t, res.Rows, exp)
+	AssertEqualRowsInOrder(t, res.Rows, exp)
 }
 
 func TestDistinctPreservesHeader(t *testing.T) {
-	ds := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds := StartProducer(MakeTable([]string{"a", "b"}, nil))
 	ds = Distinct(ds)
 	res := RunConsumer(ds)
 

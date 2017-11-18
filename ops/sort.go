@@ -16,6 +16,10 @@ func Sort(in data.Source, so []column.SortingOrder) data.Source {
 	id := fmt.Sprintf("[Sort %v]: ", atomic.AddUint64(&SortCnt, 1))
 	go func() {
 		var rows []data.Row
+		o, err := indexOrders(so, in.Header)
+		if err != nil {
+			// TODO(lionell): Handle error.
+		}
 		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
@@ -23,13 +27,9 @@ func Sort(in data.Source, so []column.SortingOrder) data.Source {
 			case <-in.Done:
 				in.MarkFinalized()
 				log.Println(id + "Sorting...")
-				o, err := indexOrders(so, in.Header)
-				if err != nil {
-					// TODO(lionell): Handle error.
-				}
 				sort.Sort(byOrders{rows, o})
 				for _, r := range rows {
-					if goOn = out.TrySend(r); !goOn {
+					if goOn = out.Send(r); !goOn {
 						break
 					}
 				}

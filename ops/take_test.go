@@ -7,15 +7,15 @@ import (
 )
 
 func TestTakeStopsWhenSourceIsEmpty(t *testing.T) {
-	ds := StartProducer(NewTable([]string{"a"}, nil))
+	ds := StartProducer(MakeTable([]string{"a"}, nil))
 	ds = Take(ds, 10)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, nil)
+	AssertEqualRowsInOrder(t, res.Rows, nil)
 }
 
 func TestTakeWhenRowsLessThanLimit(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 	})
 
@@ -23,11 +23,11 @@ func TestTakeWhenRowsLessThanLimit(t *testing.T) {
 	ds = Take(ds, 10)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows)
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
 }
 
 func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	})
@@ -36,11 +36,11 @@ func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
 	ds = Take(ds, 2)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows)
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
 }
 
 func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(3), I32(4)},
 	})
@@ -49,11 +49,11 @@ func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
 	ds = Take(ds, 1)
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows[:1])
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:1])
 }
 
 func TestTakeCanStop(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(1), I32(2)},
 		{I32(4), I32(8)},
 	})
@@ -62,11 +62,11 @@ func TestTakeCanStop(t *testing.T) {
 	ds = Take(ds, 10)
 	res := RunConsumerWithLimit(ds, 1)
 
-	AssertEqualRows(t, res.Rows, in.Rows[:1])
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:1])
 }
 
 func TestTakePreservesHeader(t *testing.T) {
-	ds := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds := StartProducer(MakeTable([]string{"a", "b"}, nil))
 	ds = Take(ds, 10)
 	res := RunConsumer(ds)
 

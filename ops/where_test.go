@@ -9,7 +9,7 @@ import (
 // TODO(lionell): Test for errors.
 
 func TestWhereTakeFirstRows(t *testing.T) {
-	in := NewTable([]string{"a"}, []Row{
+	in := MakeTable([]string{"a"}, []Row{
 		{I32(1)},
 		{I32(2)},
 	})
@@ -18,11 +18,11 @@ func TestWhereTakeFirstRows(t *testing.T) {
 	ds = Where(ds, NewTrueConditionWithLimit(1))
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows[:1])
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:1])
 }
 
 func TestWhereWithAlwaysFalseCondition(t *testing.T) {
-	in := NewTable([]string{"a"}, []Row{
+	in := MakeTable([]string{"a"}, []Row{
 		{I32(1)},
 		{I32(2)},
 	})
@@ -31,11 +31,11 @@ func TestWhereWithAlwaysFalseCondition(t *testing.T) {
 	ds = Where(ds, NewTrueConditionWithLimit(0))
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, nil)
+	AssertEqualRowsInOrder(t, res.Rows, nil)
 }
 
 func TestWhereMapsHeaderCorrectly(t *testing.T) {
-	in := NewTable([]string{"a", "b"}, []Row{
+	in := MakeTable([]string{"a", "b"}, []Row{
 		{I32(2), I32(8)},
 		{I32(1), I32(7)},
 		{I32(2), I32(9)},
@@ -45,11 +45,11 @@ func TestWhereMapsHeaderCorrectly(t *testing.T) {
 	ds = Where(ds, NewOddCondition("a"))
 	res := RunConsumer(ds)
 
-	AssertEqualRows(t, res.Rows, in.Rows[1:2])
+	AssertEqualRowsInOrder(t, res.Rows, in.Rows[1:2])
 }
 
 func TestWhereCanStop(t *testing.T) {
-	in := NewTable([]string{"a"}, []Row{
+	in := MakeTable([]string{"a"}, []Row{
 		{I32(1)},
 	})
 	exp := []Row{
@@ -61,11 +61,11 @@ func TestWhereCanStop(t *testing.T) {
 	ds = Where(ds, NewTrueConditionWithLimit(5))
 	res := RunConsumerWithLimit(ds, 2)
 
-	AssertEqualRows(t, res.Rows, exp)
+	AssertEqualRowsInOrder(t, res.Rows, exp)
 }
 
 func TestWherePreservesHeader(t *testing.T) {
-	ds := StartProducer(NewTable([]string{"a", "b"}, nil))
+	ds := StartProducer(MakeTable([]string{"a", "b"}, nil))
 	ds = Where(ds, NewOddCondition("a"))
 	res := RunConsumer(ds)
 

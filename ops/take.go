@@ -21,7 +21,7 @@ func Take(in data.Source, cnt int) data.Source {
 			select {
 			case r := <-in.Data:
 				cnt--
-				goOn = out.TrySend(r)
+				goOn = out.Send(r)
 			case <-in.Done:
 				log.Println(id + "No more work to do.")
 				in.MarkFinalized()

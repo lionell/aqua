@@ -15,7 +15,7 @@ func RunConsumer(in data.Source) data.Table {
 			goOn = false
 		}
 	}
-	return data.NewTable(in.Header, rows)
+	return data.MakeTable(in.Header, rows)
 }
 
 func RunConsumerWithLimit(in data.Source, limit int) data.Table {
@@ -34,7 +34,7 @@ func RunConsumerWithLimit(in data.Source, limit int) data.Table {
 		}
 	}
 	in.Finalize()
-	return data.NewTable(in.Header, rows)
+	return data.MakeTable(in.Header, rows)
 }
 
 func RunConsumerWithTimeout(in data.Source, timeout time.Duration) data.Table {
@@ -51,5 +51,5 @@ func RunConsumerWithTimeout(in data.Source, timeout time.Duration) data.Table {
 		}
 	}
 	in.Finalize()
-	return data.NewTable(in.Header, rows)
+	return data.MakeTable(in.Header, rows)
 }
