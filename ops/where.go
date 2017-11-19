@@ -10,20 +10,23 @@ import (
 
 var WhereCnt uint64 = 0
 
-func Where(in data.Source, c column.Condition) data.Source {
+func Where(in data.Source, c column.Condition) (data.Source, error) {
+	if err := c.Verify(in.Header.Types()); err != nil {
+		return data.Source{}, err
+	}
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Where %v]: ", atomic.AddUint64(&WhereCnt, 1))
 	go func() {
 		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
-				m, err := data.Bind(r, in.Header)
+				m, err := in.Header.BindRow(r)
 				if err != nil {
-					// TODO(lionell): Handle error
+					panic(err)
 				}
 				ok, err := c.Check(m)
 				if err != nil {
-					// TODO(lionell): Handle error
+					panic(err)
 				}
 				if !ok {
 					continue
@@ -41,5 +44,5 @@ func Where(in data.Source, c column.Condition) data.Source {
 		log.Println(id + "Finished.")
 		out.Signal()
 	}()
-	return out
+	return out, nil
 }

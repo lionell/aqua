@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"github.com/lionell/aqua/column"
 	"github.com/lionell/aqua/data"
+	"github.com/pkg/errors"
 )
 
-func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.JoinType) data.Source {
+func Join(in1, in2 data.Source, jc []column.JoinCondition, t column.JoinType) (data.Source, error) {
+	ic, err := indexConditions(jc, in1.Header, in2.Header)
+	if err != nil {
+		return data.Source{}, errors.Wrap(err, "can't index join condition")
+	}
 	out := data.NewSource(generateHeader(in1.Header, in2.Header))
 	go func() {
 		var d1, d2 []data.Row
 		s1 := data.NewRowSet()
 		s2 := data.NewRowSet()
-		ic, err := indexConditions(jc, in1.Header, in2.Header)
-		if err != nil {
-			// TODO(lionell): Handle error.
-		}
 		goOn := true
 		for goOn && (!in1.IsFinalized() || !in2.IsFinalized()) {
 			select {
@@ -87,7 +88,7 @@ func Join(in1 data.Source, in2 data.Source, jc []column.JoinCondition, t column.
 		in2.Finalize()
 		out.Signal()
 	}()
-	return out
+	return out, nil
 }
 
 type condition struct {
@@ -120,14 +121,14 @@ func satisfy(r1, r2 data.Row, ic []condition) bool {
 }
 
 func generateHeader(h1, h2 data.Header) data.Header {
-	var res []string
+	var res []data.Column
 	res = append(append(res, h1...), h2...)
 	u := make(map[string]bool)
-	for i, x := range res {
-		if u[x] {
-			res[i] = "$" + res[i]
+	for i, c := range res {
+		if u[c.Name] {
+			res[i].Name = "$" + res[i].Name
 		}
-		u[x] = true
+		u[c.Name] = true
 	}
 	return res
 }

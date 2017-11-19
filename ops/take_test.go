@@ -6,56 +6,65 @@ import (
 	"testing"
 )
 
-func TestTakeStopsWhenSourceIsEmpty(t *testing.T) {
-	ds := StartProducer(MakeTable([]string{"a"}, nil))
-	ds = Take(ds, 10)
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, nil)
-}
-
-func TestTakeWhenRowsLessThanLimit(t *testing.T) {
-	in := MakeTable([]string{"a", "b"}, []Row{
-		{I32(1), I32(2)},
-	})
-
-	ds := StartProducer(in)
-	ds = Take(ds, 10)
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
-}
-
-func TestTakeWhenDataSizeEqualsToLimit(t *testing.T) {
-	in := MakeTable([]string{"a", "b"}, []Row{
-		{I32(1), I32(2)},
-		{I32(3), I32(4)},
-	})
-
-	ds := StartProducer(in)
-	ds = Take(ds, 2)
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
-}
-
-func TestTakeWhenRowsMoreThanLimit(t *testing.T) {
-	in := MakeTable([]string{"a", "b"}, []Row{
-		{I32(1), I32(2)},
-		{I32(3), I32(4)},
-	})
-
-	ds := StartProducer(in)
-	ds = Take(ds, 1)
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:1])
+func TestTake(t *testing.T) {
+	tests := []struct {
+		desc string
+		in  Table
+		cnt int
+		exp []Row
+	}{
+		{
+			desc: "empty source",
+			in:  MakeTable([]Column{{"a", TypeI32}}, nil),
+			cnt: 10,
+			exp: nil,
+		},
+		{
+			desc: "rows less than limit",
+			in: MakeTable([]Column{{"a", TypeI32}}, []Row{
+				{I32(1)},
+			}),
+			cnt: 10,
+			exp: []Row{
+				{I32(1)},
+			},
+		},
+		{
+			desc: "rows just as for limit",
+			in: MakeTable([]Column{{"a", TypeI32}}, []Row{
+				{I32(1)},
+				{I32(2)},
+			}),
+			cnt: 2,
+			exp: []Row{
+				{I32(1)},
+				{I32(2)},
+			},
+		},
+		{
+			desc: "rows more than limit",
+			in: MakeTable([]Column{{"a", TypeI32}}, []Row{
+				{I32(1)},
+				{I32(2)},
+			}),
+			cnt: 1,
+			exp: []Row{
+				{I32(1)},
+			},
+		},
+	}
+	for _, ts := range tests {
+		ds := StartProducer(ts.in)
+		ds = Take(ds, ts.cnt)
+		res := RunConsumer(ds)
+		AssertEqualRowsInOrder(t, res.Rows, ts.exp)
+	}
 }
 
 func TestTakeCanStop(t *testing.T) {
-	in := MakeTable([]string{"a", "b"}, []Row{
-		{I32(1), I32(2)},
-		{I32(4), I32(8)},
+	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
+		{I32(1)},
+		{I32(2)},
 	})
 
 	ds := StartInfiniteProducer(in)
@@ -66,9 +75,9 @@ func TestTakeCanStop(t *testing.T) {
 }
 
 func TestTakePreservesHeader(t *testing.T) {
-	ds := StartProducer(MakeTable([]string{"a", "b"}, nil))
+	ds := StartProducer(MakeTable([]Column{{"a", TypeI32}, {"b", TypeI32}}, nil))
 	ds = Take(ds, 10)
 	res := RunConsumer(ds)
 
-	AssertEqualHeaders(t, res.Header, []string{"a", "b"})
+	AssertEqualHeaders(t, res.Header, []Column{{"a", TypeI32}, {"b", TypeI32}})
 }

@@ -1,4 +1,4 @@
-package jobs
+package cons
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	"text/tabwriter"
 )
 
-func RunTabularWriter(out io.Writer, ds data.Source) {
+func RunTabularWriter(ds data.Source, out io.Writer) {
 	w := tabwriter.NewWriter(out, 0, 0, 3, ' ', tabwriter.AlignRight)
 	defer w.Flush()
 	writeHeader(w, ds.Header)

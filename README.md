@@ -1,6 +1,7 @@
 # Aqua lang
 
 [![Build Status](https://travis-ci.org/lionell/aqua.svg?branch=master)](https://travis-ci.org/lionell/aqua)
+[![GoDoc](https://godoc.org/github.com/lionell/aqua?status.svg)](http://godoc.org/github.com/lionell/aqua)
 
 <div align="center">
   <img width="300px" src="https://raw.githubusercontent.com/lionell/aqua/master/docs/logo.png" />
@@ -26,8 +27,10 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [x] Project (tests)
 - [x] Join
 - [x] Join (tests)
-- [ ] Error handling
+- [ ] Instant errors
+- [ ] Switch to using [github.com/pkg/errors](https://github.com/pkg/errors)
 - [ ] Refactor jobs package to cons/prod
 - [ ] CLI
 - [ ] Add more datatypes(float64, string, char)
 - [ ] Implement fuzzy union (faster, no order)
+- [ ] Figure out why defer is not working

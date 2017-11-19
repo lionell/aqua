@@ -11,15 +11,15 @@ import (
 
 var SortCnt uint64 = 0
 
-func Sort(in data.Source, so []column.SortingOrder) data.Source {
+func Sort(in data.Source, so []column.SortingOrder) (data.Source, error) {
+	o, err := indexOrders(so, in.Header)
+	if err != nil {
+		return data.Source{}, nil
+	}
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Sort %v]: ", atomic.AddUint64(&SortCnt, 1))
 	go func() {
 		var rows []data.Row
-		o, err := indexOrders(so, in.Header)
-		if err != nil {
-			// TODO(lionell): Handle error.
-		}
 		for goOn := true; goOn; {
 			select {
 			case r := <-in.Data:
@@ -42,7 +42,7 @@ func Sort(in data.Source, so []column.SortingOrder) data.Source {
 		in.Finalize()
 		out.Signal()
 	}()
-	return out
+	return out, nil
 }
 
 type order struct {
@@ -97,7 +97,7 @@ func (bo byOrders) Less(i, j int) bool {
 				return true
 			}
 		default:
-			log.Fatalf("Unknown order specified %v", o.order)
+			panic(fmt.Sprintf("Unknown order specified %v", o.order))
 		}
 	}
 	return false

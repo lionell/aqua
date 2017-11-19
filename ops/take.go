@@ -12,7 +12,6 @@ var TakeCnt uint64 = 0
 func Take(in data.Source, cnt int) data.Source {
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Take %v]: ", atomic.AddUint64(&TakeCnt, 1))
-
 	go func() {
 		for goOn := true; goOn; {
 			if cnt == 0 {
@@ -34,6 +33,5 @@ func Take(in data.Source, cnt int) data.Source {
 		log.Println(id + "Finished.")
 		out.Signal()
 	}()
-
 	return out
 }

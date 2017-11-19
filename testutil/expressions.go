@@ -24,6 +24,14 @@ func (e sumExpression) Eval(m map[string]data.Value) (data.Value, error) {
 	return data.I32(sum), nil
 }
 
+func (e sumExpression) Verify(m map[string]data.Type) error {
+	return nil
+}
+
+func (e sumExpression) DeduceType(m map[string]data.Type) (data.Type, error) {
+	return data.TypeI32, nil
+}
+
 func NewSumExpression(columns ...string) column.Expression {
 	return sumExpression(columns)
 }

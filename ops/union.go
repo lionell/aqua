@@ -9,9 +9,9 @@ import (
 
 var UnionCnt uint64 = 0
 
-func Union(in1, in2 data.Source) data.Source {
-	if err := verifyHeaders(in1.Header, in2.Header); err != nil {
-		// TODO(lionell): Handle error.
+func Union(in1, in2 data.Source) (data.Source, error) {
+	if err := verifySameHeaders(in1.Header, in2.Header); err != nil {
+		return data.Source{}, err
 	}
 	out := data.NewSource(in1.Header)
 	id := fmt.Sprintf("[Union %v]: ", atomic.AddUint64(&UnionCnt, 1))
@@ -44,10 +44,10 @@ func Union(in1, in2 data.Source) data.Source {
 		in2.Finalize()
 		out.Signal()
 	}()
-	return out
+	return out, nil
 }
 
-func verifyHeaders(h1, h2 data.Header) error {
+func verifySameHeaders(h1, h2 data.Header) error {
 	if len(h1) != len(h2) {
 		return fmt.Errorf("header length mismatch (%v vs %v)", len(h1), len(h2))
 	}

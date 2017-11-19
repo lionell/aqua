@@ -4,6 +4,10 @@ import "fmt"
 
 type None struct{}
 
+func (n None) Type() Type {
+	return TypeNone
+}
+
 func (n None) Less(v Value) bool {
 	return false
 }

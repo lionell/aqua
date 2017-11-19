@@ -4,6 +4,10 @@ import "fmt"
 
 type I32 int32
 
+func (i I32) Type() Type {
+	return TypeI32
+}
+
 func (i I32) Less(v Value) bool {
 	return i < toI32(v)
 }

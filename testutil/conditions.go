@@ -16,6 +16,10 @@ func (c *conditionWithLimit) Check(m map[string]data.Value) (bool, error) {
 	return false, nil
 }
 
+func (c conditionWithLimit) Verify(m map[string]data.Type) error {
+	return nil
+}
+
 func NewTrueConditionWithLimit(limit int) column.Condition {
 	var res = conditionWithLimit(limit)
 	return &res
@@ -33,6 +37,10 @@ func (c oddCondition) Check(m map[string]data.Value) (bool, error) {
 	} else {
 		return false, fmt.Errorf("there is no value bound to column (%v) in the map %v", string(c), m)
 	}
+}
+
+func (c oddCondition) Verify(m map[string]data.Type) error {
+	return nil
 }
 
 func NewOddCondition(columnName string) column.Condition {

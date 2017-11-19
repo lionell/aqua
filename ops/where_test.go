@@ -1,6 +1,7 @@
 package ops
 
 import (
+	. "github.com/lionell/aqua/column"
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
@@ -8,48 +9,59 @@ import (
 
 // TODO(lionell): Test for errors.
 
-func TestWhereTakeFirstRows(t *testing.T) {
-	in := MakeTable([]string{"a"}, []Row{
-		{I32(1)},
-		{I32(2)},
-	})
-
-	ds := StartProducer(in)
-	ds = Where(ds, NewTrueConditionWithLimit(1))
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, in.Rows[:1])
-}
-
-func TestWhereWithAlwaysFalseCondition(t *testing.T) {
-	in := MakeTable([]string{"a"}, []Row{
-		{I32(1)},
-		{I32(2)},
-	})
-
-	ds := StartProducer(in)
-	ds = Where(ds, NewTrueConditionWithLimit(0))
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, nil)
-}
-
-func TestWhereMapsHeaderCorrectly(t *testing.T) {
-	in := MakeTable([]string{"a", "b"}, []Row{
-		{I32(2), I32(8)},
-		{I32(1), I32(7)},
-		{I32(2), I32(9)},
-	})
-
-	ds := StartProducer(in)
-	ds = Where(ds, NewOddCondition("a"))
-	res := RunConsumer(ds)
-
-	AssertEqualRowsInOrder(t, res.Rows, in.Rows[1:2])
+func TestWhere(t *testing.T) {
+	tests := []struct {
+		desc string
+		in   Table
+		cond Condition
+		exp  []Row
+	}{
+		{
+			desc: "take first 1 row",
+			in: MakeTable([]Column{{"a", TypeI32}}, []Row{
+				{I32(1)},
+				{I32(2)},
+			}),
+			cond: NewTrueConditionWithLimit(1),
+			exp: []Row{
+				{I32(1)},
+			},
+		},
+		{
+			desc: "always false condition",
+			in: MakeTable([]Column{{"a", TypeI32}}, []Row{
+				{I32(1)},
+				{I32(2)},
+			}),
+			cond: NewTrueConditionWithLimit(0),
+			exp:  nil,
+		},
+		{
+			desc: "correctly maps header",
+			in: MakeTable([]Column{{"a", TypeI32}, {"b", TypeI32}}, []Row{
+				{I32(2), I32(8)},
+				{I32(1), I32(7)},
+				{I32(2), I32(9)},
+			}),
+			cond: NewOddCondition("a"),
+			exp: []Row{
+				{I32(1), I32(7)},
+			},
+		},
+	}
+	for _, ts := range tests {
+		ds := StartProducer(ts.in)
+		ds, err := Where(ds, ts.cond)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		res := RunConsumer(ds)
+		AssertEqualRowsInOrder(t, res.Rows, ts.exp)
+	}
 }
 
 func TestWhereCanStop(t *testing.T) {
-	in := MakeTable([]string{"a"}, []Row{
+	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(1)},
 	})
 	exp := []Row{
@@ -58,16 +70,22 @@ func TestWhereCanStop(t *testing.T) {
 	}
 
 	ds := StartInfiniteProducer(in)
-	ds = Where(ds, NewTrueConditionWithLimit(5))
+	ds, err := Where(ds, NewTrueConditionWithLimit(5))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEqualRowsInOrder(t, res.Rows, exp)
 }
 
 func TestWherePreservesHeader(t *testing.T) {
-	ds := StartProducer(MakeTable([]string{"a", "b"}, nil))
-	ds = Where(ds, NewOddCondition("a"))
+	ds := StartProducer(MakeTable([]Column{{"a", TypeI32}}, nil))
+	ds, err := Where(ds, NewOddCondition("a"))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
 	res := RunConsumer(ds)
 
-	AssertEqualHeaders(t, res.Header, []string{"a", "b"})
+	AssertEqualHeaders(t, res.Header, []Column{{"a", TypeI32}})
 }

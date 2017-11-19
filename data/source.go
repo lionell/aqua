@@ -7,7 +7,7 @@ type Source struct {
 	Done chan struct{}
 }
 
-func NewSource(header []string) Source {
+func NewSource(header Header) Source {
 	return Source{header, make(chan Row), make(chan struct{}), make(chan struct{}, 1)}
 }
 
