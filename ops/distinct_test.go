@@ -4,6 +4,7 @@ import (
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
+	"time"
 )
 
 func TestDistinct(t *testing.T) {
@@ -49,7 +50,7 @@ func TestDistinct(t *testing.T) {
 	}
 }
 
-func TestDistinctCanStop(t *testing.T) {
+func TestDistinctCanStopWhileStreamingResults(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(1)},
 		{I32(3)},
@@ -58,11 +59,18 @@ func TestDistinctCanStop(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(in)
+	ds := StartLoopingProducer(in)
 	ds = Distinct(ds)
 	res := RunConsumerWithLimit(ds, 1)
 
 	AssertEqualRowsInOrder(t, res.Rows, exp)
+}
+
+func TestDistinctCanStopWhileWaitingForInput(t *testing.T) {
+	t.Parallel()
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds = Distinct(ds)
+	RunConsumerWithTimeout(ds, time.Millisecond*50)
 }
 
 func TestDistinctPreservesHeader(t *testing.T) {

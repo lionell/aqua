@@ -14,7 +14,8 @@ var SortCnt uint64 = 0
 func Sort(in data.Source, so []column.SortingOrder) (data.Source, error) {
 	o, err := indexOrders(so, in.Header)
 	if err != nil {
-		return data.Source{}, nil
+		in.Finalize()
+		return data.Source{}, err
 	}
 	out := data.NewSource(in.Header)
 	id := fmt.Sprintf("[Sort %v]: ", atomic.AddUint64(&SortCnt, 1))
@@ -76,9 +77,6 @@ func (bo byOrders) Swap(i, j int) {
 }
 
 func (bo byOrders) Less(i, j int) bool {
-	if bo.orders == nil {
-		return i < j
-	}
 	r1 := bo.rows[i]
 	r2 := bo.rows[j]
 	for _, o := range bo.orders {

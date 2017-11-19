@@ -83,20 +83,7 @@ func TestSort(t *testing.T) {
 	}
 }
 
-func TestSortCanStopOnReceivingData(t *testing.T) {
-	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
-		{I32(1)},
-	})
-
-	ds := StartInfiniteProducer(in)
-	ds, err := Sort(ds, []SortingOrder{{"a", OrderAsc}})
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	RunConsumerWithTimeout(ds, time.Millisecond*100)
-}
-
-func TestSortCanStopOnSendingResults(t *testing.T) {
+func TestSortCanStopWhileStreamingResults(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(2)},
 		{I32(7)},
@@ -114,6 +101,16 @@ func TestSortCanStopOnSendingResults(t *testing.T) {
 	AssertEqualRowsInOrder(t, res.Rows, in.Rows[2:3])
 }
 
+func TestSortCanStopWhileWaitingForInput(t *testing.T) {
+	t.Parallel()
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Sort(ds, []SortingOrder{{"a", OrderAsc}})
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	RunConsumerWithTimeout(ds, time.Millisecond*50)
+}
+
 func TestSortPreservesHeader(t *testing.T) {
 	ds := StartProducer(MakeTable([]Column{{"a", TypeI32}, {"b", TypeI32}}, nil))
 	ds, err := Sort(ds, []SortingOrder{{"a", OrderAsc}})
@@ -123,4 +120,12 @@ func TestSortPreservesHeader(t *testing.T) {
 	res := RunConsumer(ds)
 
 	AssertEqualHeaders(t, res.Header, []Column{{"a", TypeI32}, {"b", TypeI32}})
+}
+
+func TestSortReturnsErrorWhenCantIndexOrderColumns(t *testing.T) {
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Sort(ds, []SortingOrder{{"b", OrderAsc}})
+	if err == nil {
+		t.Errorf("Error expected")
+	}
 }

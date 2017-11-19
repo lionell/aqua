@@ -35,3 +35,13 @@ func (e sumExpression) DeduceType(m map[string]data.Type) (data.Type, error) {
 func NewSumExpression(columns ...string) column.Expression {
 	return sumExpression(columns)
 }
+
+type WrongExpression struct{}
+
+func (e WrongExpression) Eval(map[string]data.Value) (data.Value, error) {
+	return data.None{}, fmt.Errorf("can't eval wrong expression")
+}
+
+func (e WrongExpression) DeduceType(map[string]data.Type) (data.Type, error) {
+	return data.TypeNone, fmt.Errorf("can't deduce type of wrong expression")
+}

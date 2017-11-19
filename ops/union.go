@@ -11,6 +11,8 @@ var UnionCnt uint64 = 0
 
 func Union(in1, in2 data.Source) (data.Source, error) {
 	if err := verifySameHeaders(in1.Header, in2.Header); err != nil {
+		in1.Finalize()
+		in2.Finalize()
 		return data.Source{}, err
 	}
 	out := data.NewSource(in1.Header)

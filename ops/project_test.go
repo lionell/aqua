@@ -5,6 +5,7 @@ import (
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
+	"time"
 )
 
 // TODO(lionell): Test for errors.
@@ -63,7 +64,7 @@ func TestProject(t *testing.T) {
 	}
 }
 
-func TestProjectCanStop(t *testing.T) {
+func TestProjectCanStopWhileStreamingResults(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(1)},
 	})
@@ -72,7 +73,7 @@ func TestProjectCanStop(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(in)
+	ds := StartLoopingProducer(in)
 	ds, err := Project(ds, []Definition{{"a", NewSumExpression("a")}})
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -80,4 +81,22 @@ func TestProjectCanStop(t *testing.T) {
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEqualRowsInOrder(t, res.Rows, exp)
+}
+
+func TestProjectCanStopWhileWaitingForInput(t *testing.T) {
+	t.Parallel()
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Project(ds, []Definition{{"a", NewSumExpression("a")}})
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	RunConsumerWithTimeout(ds, time.Millisecond*50)
+}
+
+func TestProjectReturnsErrorWhenCantDeduceExpressionType(t *testing.T) {
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Project(ds, []Definition{{"a", WrongExpression{}}})
+	if err == nil {
+		t.Errorf("Error expected")
+	}
 }

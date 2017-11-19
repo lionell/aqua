@@ -1,8 +1,6 @@
 package testutil
 
-import (
-	"github.com/lionell/aqua/data"
-)
+import "github.com/lionell/aqua/data"
 
 func StartProducer(t data.Table) data.Source {
 	out := data.NewSource(t.Header)
@@ -20,7 +18,7 @@ func StartProducer(t data.Table) data.Source {
 	return out
 }
 
-func StartInfiniteProducer(t data.Table) data.Source {
+func StartLoopingProducer(t data.Table) data.Source {
 	out := data.NewSource(t.Header)
 	go func() {
 	Loop:
@@ -33,6 +31,15 @@ func StartInfiniteProducer(t data.Table) data.Source {
 				}
 			}
 		}
+		out.Signal()
+	}()
+	return out
+}
+
+func StartBlockingProducer(h data.Header) data.Source {
+	out := data.NewSource(h)
+	go func() {
+		<-out.Stop
 		out.Signal()
 	}()
 	return out

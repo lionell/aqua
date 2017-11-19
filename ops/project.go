@@ -13,6 +13,7 @@ var ProjectCnt uint64 = 0
 func Project(in data.Source, ds []column.Definition) (data.Source, error) {
 	h, err := projectHeader(ds, in.Header.Types())
 	if err != nil {
+		in.Finalize()
 		return data.Source{}, err
 	}
 	out := data.NewSource(h)

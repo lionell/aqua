@@ -5,6 +5,7 @@ import (
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
+	"time"
 )
 
 // TODO(lionell): Test for errors.
@@ -60,7 +61,7 @@ func TestWhere(t *testing.T) {
 	}
 }
 
-func TestWhereCanStop(t *testing.T) {
+func TestWhereCanStopWhileStreamingResults(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(1)},
 	})
@@ -69,7 +70,7 @@ func TestWhereCanStop(t *testing.T) {
 		{I32(1)},
 	}
 
-	ds := StartInfiniteProducer(in)
+	ds := StartLoopingProducer(in)
 	ds, err := Where(ds, NewTrueConditionWithLimit(5))
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
@@ -77,6 +78,16 @@ func TestWhereCanStop(t *testing.T) {
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEqualRowsInOrder(t, res.Rows, exp)
+}
+
+func TestWhereCanStopWhileWaitingForInput(t *testing.T) {
+	t.Parallel()
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Where(ds, NewTrueConditionWithLimit(5))
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+	RunConsumerWithTimeout(ds, time.Microsecond*50)
 }
 
 func TestWherePreservesHeader(t *testing.T) {
@@ -88,4 +99,12 @@ func TestWherePreservesHeader(t *testing.T) {
 	res := RunConsumer(ds)
 
 	AssertEqualHeaders(t, res.Header, []Column{{"a", TypeI32}})
+}
+
+func TestWhereReturnsErrorWhenCantVerifyCondition(t *testing.T) {
+	ds := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Where(ds, WrongCondition{})
+	if err == nil {
+		t.Fatalf("Error expected")
+	}
 }

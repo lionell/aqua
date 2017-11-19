@@ -46,3 +46,13 @@ func (c oddCondition) Verify(m map[string]data.Type) error {
 func NewOddCondition(columnName string) column.Condition {
 	return oddCondition(columnName)
 }
+
+type WrongCondition struct{}
+
+func (c WrongCondition) Check(map[string]data.Value) (bool, error) {
+	return false, fmt.Errorf("can't check wrong condition")
+}
+
+func (c WrongCondition) Verify(map[string]data.Type) error {
+	return fmt.Errorf("can't verify wrong condition")
+}

@@ -4,6 +4,7 @@ import (
 	. "github.com/lionell/aqua/data"
 	. "github.com/lionell/aqua/testutil"
 	"testing"
+	"time"
 )
 
 // TODO(lionell): Test union throws error when headers don't match.
@@ -69,13 +70,13 @@ func TestUnion(t *testing.T) {
 	}
 }
 
-func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
+func TestUnionCanStopWhileStreamingResults(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(5)},
 		{I32(7)},
 	})
 
-	ds1 := StartInfiniteProducer(in)
+	ds1 := StartLoopingProducer(in)
 	ds2 := StartProducer(MakeTable([]Column{{"a", TypeI32}}, nil))
 	ds, err := Union(ds1, ds2)
 	if err != nil {
@@ -86,14 +87,14 @@ func TestUnionCanStopWhileProcessingFirstSource(t *testing.T) {
 	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
 }
 
-func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
+func TestUnionCanStopWhileStreamingResults1(t *testing.T) {
 	in := MakeTable([]Column{{"a", TypeI32}}, []Row{
 		{I32(5)},
 		{I32(7)},
 	})
 
 	ds1 := StartProducer(MakeTable([]Column{{"a", TypeI32}}, nil))
-	ds2 := StartInfiniteProducer(in)
+	ds2 := StartLoopingProducer(in)
 	ds, err := Union(ds1, ds2)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -101,6 +102,28 @@ func TestUnionCanStopWhileProcessingSecondSource(t *testing.T) {
 	res := RunConsumerWithLimit(ds, 2)
 
 	AssertEqualRowsInOrder(t, res.Rows, in.Rows)
+}
+
+func TestUnionCanStopWhileWaitingForInput(t *testing.T) {
+	t.Parallel()
+	ds1 := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds2 := StartProducer(MakeTable([]Column{{"a", TypeI32}}, nil))
+	ds, err := Union(ds1, ds2)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	RunConsumerWithTimeout(ds, time.Millisecond*50)
+}
+
+func TestUnionCanStopWhileWaitingForInput1(t *testing.T) {
+	t.Parallel()
+	ds1 := StartProducer(MakeTable([]Column{{"a", TypeI32}}, nil))
+	ds2 := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds, err := Union(ds1, ds2)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	RunConsumerWithTimeout(ds, time.Millisecond*50)
 }
 
 func TestUnionPreservesHeader(t *testing.T) {
@@ -113,4 +136,22 @@ func TestUnionPreservesHeader(t *testing.T) {
 	res := RunConsumer(ds)
 
 	AssertEqualHeaders(t, res.Header, []Column{{"a", TypeI32}, {"b", TypeI32}})
+}
+
+func TestUnionReturnsErrorOnHeaderMismatch(t *testing.T) {
+	ds1 := StartBlockingProducer([]Column{{"b", TypeI32}})
+	ds2 := StartBlockingProducer([]Column{{"a", TypeI32}})
+	_, err := Union(ds1, ds2)
+	if err == nil {
+		t.Errorf("Error expected")
+	}
+}
+
+func TestUnionReturnsErrorOnHeaderMismatch1(t *testing.T) {
+	ds1 := StartBlockingProducer([]Column{{"a", TypeI32}})
+	ds2 := StartBlockingProducer([]Column{{"a", TypeI32}, {"b", TypeI32}})
+	_, err := Union(ds1, ds2)
+	if err == nil {
+		t.Errorf("Error expected")
+	}
 }

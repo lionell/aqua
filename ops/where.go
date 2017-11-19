@@ -12,6 +12,7 @@ var WhereCnt uint64 = 0
 
 func Where(in data.Source, c column.Condition) (data.Source, error) {
 	if err := c.Verify(in.Header.Types()); err != nil {
+		in.Finalize()
 		return data.Source{}, err
 	}
 	out := data.NewSource(in.Header)

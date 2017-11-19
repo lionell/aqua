@@ -10,6 +10,8 @@ import (
 func Join(in1, in2 data.Source, jc []column.JoinCondition, t column.JoinType) (data.Source, error) {
 	ic, err := indexConditions(jc, in1.Header, in2.Header)
 	if err != nil {
+		in1.Finalize()
+		in2.Finalize()
 		return data.Source{}, errors.Wrap(err, "can't index join condition")
 	}
 	out := data.NewSource(generateHeader(in1.Header, in2.Header))

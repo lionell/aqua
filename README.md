@@ -27,10 +27,11 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [x] Project (tests)
 - [x] Join
 - [x] Join (tests)
-- [ ] Instant errors
+- [x] Instant errors
 - [ ] Switch to using [github.com/pkg/errors](https://github.com/pkg/errors)
 - [ ] Refactor jobs package to cons/prod
 - [ ] CLI
 - [ ] Add more datatypes(float64, string, char)
-- [ ] Implement fuzzy union (faster, no order)
+- [ ] Implement fuzzy union (concurrent, no order)
 - [ ] Figure out why defer is not working
+- [ ] 100% test coverage
