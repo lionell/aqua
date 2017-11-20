@@ -28,10 +28,15 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [x] Join
 - [x] Join (tests)
 - [x] Instant errors
-- [ ] Switch to using [github.com/pkg/errors](https://github.com/pkg/errors)
-- [ ] Refactor jobs package to cons/prod
+- [x] Refactor jobs package to cons/prod
+- [x] Increase test coverage for operations
+- [x] Lexer
+- [x] Tests for lexer
+- [ ] Parser
 - [ ] CLI
 - [ ] Add more datatypes(float64, string, char)
 - [ ] Implement fuzzy union (concurrent, no order)
 - [ ] Figure out why defer is not working
-- [ ] 100% test coverage
+- [ ] Write tests for lexer
+- [ ] Use [github.com/pkg/errors](https://github.com/pkg/errors) for more error context
+- [ ] Add more robust number lexing
