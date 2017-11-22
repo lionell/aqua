@@ -20,6 +20,7 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [ ] React Native
 - [ ] Ajax
 - [ ] UML
+- [ ] WebSocket
 
 ## Roadmap
 - [x] Project
@@ -32,11 +33,13 @@ No, it's not a pun on the equipment invented by [Jan Cousteau](https://en.wikipe
 - [x] Increase test coverage for operations
 - [x] Lexer
 - [x] Tests for lexer
-- [ ] Parser
+- [x] Parser
 - [ ] CLI
-- [ ] Add more datatypes(float64, string, char)
-- [ ] Implement fuzzy union (concurrent, no order)
+- [ ] More datatypes(float64, string, char)
+- [ ] Fuzzy union (concurrent, no order)
 - [ ] Figure out why defer is not working
-- [ ] Write tests for lexer
 - [ ] Use [github.com/pkg/errors](https://github.com/pkg/errors) for more error context
-- [ ] Add more robust number lexing
+- [ ] Robust number lexing
+- [ ] Distinct by columns
+- [ ] Errors instead of nil return values in parser
+- [ ] Expression and statement support
